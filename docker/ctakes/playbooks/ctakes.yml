@@ -1,0 +1,59 @@
+# ansible-playbook test_ctakes.yml --user=gms --ask-sudo-pass
+---
+- hosts: 127.0.0.1
+  connection: local
+  #sudo: true
+  vars:
+    download_dir: /root
+    ctakes_dir: /root
+    path_test: /ansible/test/ctakes
+    ctakes_url: http://mirror.stjschools.org/public/apache//ctakes/ctakes-4.0.0/apache-ctakes-4.0.0-bin.tar.gz
+    ctakes_src: /root/apache-ctakes-4.0.0-bin.tar.gz
+    env_dir: /etc/environment
+    bash_profile: ~/.bash_profile
+    bashrc: ~/.bashrc
+    umls_user: 
+    umls_pw: 
+    java_home: /usr/lib/jvm/java-8-openjdk-amd64
+    user: gms
+  tasks:
+  - name: Prepare Install folder
+    file: path={{download_dir}} state=directory
+    become: yes
+    become_user: root
+    #  - name: Download cTAKES
+    #get_url: url={{ctakes_url}} dest={{download_dir}}
+    #become: yes
+    #become_user: root
+    #- name: Extract cTAKES
+    #unarchive: src={{ctakes_src}}
+    #           dest={{ctakes_dir}}
+    #become: yes
+    #become_user: root
+  - stat: path={{bash_profile}}
+    register: p
+  - name: Create {{bash_profile}} if not exists
+    file:
+      path="{{bash_profile}}"
+      mode=0644
+      state={{ "file" if  p.stat.exists else "touch"}}
+  - name: Update bash_profile
+    blockinfile:
+      dest: "{{ bash_profile }}"
+      block: |
+        export ctakes_umlsuser={{umls_user}}
+        export ctakes_umlsuser={{umls_pw}}
+        export PATH="{{path_test}}:$PATH"      
+      marker: '## {mark} ANSIBLE MANAGED BLOCK - cTAKES'
+      insertbefore: EOF
+      state: present
+  - name: Update bashrc
+    blockinfile:
+      dest: "{{ bashrc }}"
+      block: |
+        export ctakes_umlsuser={{umls_user}}
+        export ctakes_umlsuser={{umls_pw}}
+        export PATH="{{path_test}}:$PATH"      
+        export JAVA_HOME="{{java_home}}"
+      marker: '## {mark} ANSIBLE MANAGED BLOCK - cTAKES'
+      insertbefore: EOF
