@@ -1,6 +1,6 @@
-University of Minnesota NLP-ADAPT (Artifact Discovery and Preparation Toolkit)
+# University of Minnesota NLP-ADAPT (Artifact Discovery and Preparation Toolkit)
 
-Experiments in creating Dockerized containers utilizing: 
+## Experiments in creating Dockerized containers utilizing: 
 
 Build Docker multi-container services using `docker-composr` to run NLP-TAB annotation browser and ElasticSearch engine.
 
