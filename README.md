@@ -1,6 +1,7 @@
 # University of Minnesota NLP-ADAPT (Artifact Discovery and Preparation Toolkit)
 
-## Experiments in creating Dockerized containers utilizing:
+## Experiments in creating Dockerized containers and their dependencies utilizing:
 
+- `ansible-playbook`
 - `docker build`
-- `ansible-container build`
+- `docker-compose up`
