@@ -27,5 +27,5 @@ RUN gulp
 
 EXPOSE 8000
  
-CMD ["gulp", "webserver", "--host", "0.0.0.0"]
+CMD ["gulp", "webserver"]
 
