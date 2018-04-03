@@ -3,10 +3,12 @@ version: '3.3'
 services:
   es:
     build: './elastic-search'
+    image: 'gms/es'
     ports:
      - "9200:9200"
      - "9300:9300"  
   tab:
     build: './nlp-tab'
+    image: 'gms/nlp-tab'
     ports:
      - "8000:8000"
