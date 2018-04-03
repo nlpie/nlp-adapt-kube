@@ -8,4 +8,4 @@ From root directory issue command: `docker-compose up`
 
 This will proceed to build images and run services associated with each Dockerfile as defined in the file `docker-compose.yml`.
 
-NB: This example assumes `docker-compose.yml` is in the parent directory, and that there is a `Dockerfile` in each of the subdirectories, along with their dependencies (dependencies are not included: although an Ansible playbook to create these are in the works). 
+NB: This example assumes `docker-compose.yml` is in the parent directory, and that there is a `Dockerfile` in each of the subdirectories, along with their dependencies (dependencies are not included: although an Ansible playbook to create these is in the works). 
