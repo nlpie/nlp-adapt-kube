@@ -7,8 +7,13 @@ services:
     ports:
      - "9200:9200"
      - "9300:9300"  
+    volumes:
+     - ./data:/home/elasticsearch/data
   tab:
     build: './nlp-tab'
     image: 'gms/nlp-tab'
     ports:
      - "8000:8000"
+    volumes:
+     - ./data:/home/elasticsearch/data
+
