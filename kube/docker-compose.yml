@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  es:
+    build: ./elastic-search
+    image: horcle/es
+    ports:
+     - "9200:9200"
+     - "9300:9300"  
+    volumes:
+     - ./data:/elasticsearch/data
+    labels:
+      kompose.service.type: nodeport
+  tab:
+    build: ./nlp-tab
+    image: horcle/nlptab
+    ports:
+     - "8000:8000"
+    volumes:
+     - ./data:/app/data
+    labels:
+      kompose.service.type: nodeport
