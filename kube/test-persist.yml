@@ -1,0 +1,19 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: test-pod
+spec:
+  volumes:
+  - name:  test-volume
+    persistentVolumeClaim:
+      claimName:  test-volume-claim
+  containers:
+  - image: horcle/es
+    # type: nodeport
+    name: es
+    ports:
+    - containerPort: 9200
+    - containerPort: 9300
+    volumeMounts:
+    - mountPath: "/usr/share/test_data"
+      name: test-volume

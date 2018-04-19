@@ -1,0 +1,15 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: test-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual-test
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+      storage: 100M
+  hostPath:
+    path: "/mnt/data"
+
