@@ -19,16 +19,15 @@ spec:
     spec:
       containers:
       - image: horcle/es
-    # type: NodePort
         name: es
         ports:
         - containerPort: 9200
         - containerPort: 9300
         volumeMounts:
         - name: volume
-          mountPath: "/data"
+          mountPath: "/data/test"
   
       volumes:
       - name: volume
         hostPath:
-          path: "/data"
+          path: "/data/test"
