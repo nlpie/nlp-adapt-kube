@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: biomedicus
+spec:
+  selector:
+    matchLabels:
+      app: biomedicus
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: biomedicus
+        tier: backend
+        track: stable
+  
+    spec:
+      containers:
+      - image: horcle/biomedicus
+        name: biomedicus
+        volumeMounts:
+        - name: volume
+          mountPath: "/data/test"
+  
+      volumes:
+      - name: volume
+        hostPath:
+          path: "/data/test"
+
+
