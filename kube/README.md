@@ -3,7 +3,7 @@
 ### Requirements:
 
 * Docker CE
-* VirtualBox (for Mac OS only)
+* VirtualBox (for Mac OS only: `brew install caskroom/cask/virtualbox`)
 * minikube (`brew cask install minikube`)
 * kubectl (`brew install kubectl`)
 * bash-completion (`brew install bash-completion`)
