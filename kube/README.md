@@ -8,3 +8,4 @@
 * kubectl (`brew install kubectl`)
 * bash-completion (`brew install bash-completion`)
 * argo (`brew install argoproj/tap/argo`)
+* others?
