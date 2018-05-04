@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tab
+spec:
+  selector:
+    app: tab
+  ports:
+  - port: 80
+    targetPort: 8000
+    nodePort: 31234
+  type: NodePort
+---
 apiVersion: apps/v1
 
 kind: Deployment
@@ -7,27 +20,24 @@ spec:
   selector:
     matchLabels:
       app: tab
-      tier: backend
       track: stable
   template:
     metadata:
       labels:
         app: tab
-        tier: backend
         track: stable
-  
+
     spec:
       containers:
       - image: horcle/nlptab
         name: tab
         ports:
-        - containerPort: 8000 
+        - containerPort: 8000
         volumeMounts:
         - name: volume
           mountPath: "/data/test"
-  
+
       volumes:
       - name: volume
         hostPath:
           path: "/data/test"
-
