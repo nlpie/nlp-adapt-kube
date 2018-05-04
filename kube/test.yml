@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: es
+spec:
+  selector:
+    matchLabels:
+      app: es
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: es
+        tier: backend
+        track: stable
+    spec:
+      containers:
+      - image: horcle/es
+    # type: NodePort
+        name: es
+        ports:
+        - containerPort: 9200
+        - containerPort: 9300
+        volumeMounts:
+        - name: volume
+          mountPath: "/data"
+  
+      volumes:
+      - name: volume
+        hostPath:
+          path: "/data"
