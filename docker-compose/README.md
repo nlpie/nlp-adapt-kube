@@ -2,7 +2,7 @@
 
 ## Experiments in creating Dockerized containers utilizing: 
 
-Build Docker multi-container services using `docker-composr` to run NLP-TAB annotation browser and ElasticSearch engine.
+Build Docker multi-container services using `docker-composer` to run NLP-TAB annotation browser and ElasticSearch engine.
 
 From root directory issue command: `docker-compose up`
 
