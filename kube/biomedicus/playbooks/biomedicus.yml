@@ -9,8 +9,9 @@
     path_test: ~/development/nlp/test
     ctakes_url: http://mirror.stjschools.org/public/apache//ctakes/ctakes-4.0.0/apache-ctakes-4.0.0-bin.tar.gz
     ctakes_src: ~/development/nlp/test/apache-ctakes-4.0.0-bin.tar.gz
-    biomedicus_src: http://athena.ahc.umn.edu/biomedicus-downloads/verify-umls/biomedicus-data-1.8.1-umls-license-required.zip
+    biomedicus_src: https://athena.ahc.umn.edu/biomedicus-downloads/verify-umls/biomedicus-data-1.8.1-umls-license-required.zip
     biomedicus_no_umls_src: https://github.com/nlpie/biomedicus/releases/download/v1.8.4/biomedicus-data-1.8.4-umls.zip
+    biomedicus_zip: biomedicus_distro.zip
     env_dir: /etc/profile
     bash_profile: ~/.bash_profile
     umls_user: ""
@@ -26,15 +27,27 @@
     become: yes
     become_user: gms
     validate_certs: no
-  - name: POST biomedicus request via curl
+  - name: POST biomedicus request via curl w/o umls
     shell: 'curl -d umlsuser="{{ umls_user }}" \
                  -d umlspw="{{ umls_pw }}" \
-                 {{ biomedicus_src }}'
+                 {{ biomedicus_no_umls_src }}" \
+                 -o {{biomedicus_zip}}'
+    when: (umls_user is undefined)
+          or
+          (umls_user is none)
+          or
+          (umls_user | trim == "")
+           
+  - name: POST biomedicus request via curl with umls
+    shell: 'curl -d umlsuser="{{ umls_user }}" \
+                 -d umlspw="{{ umls_pw }}" \
+                 {{ biomedicus_src }}" \
+                 -o {{biomedicus_zip}}'
     when: not(
           (umls_user is undefined)
           or
           (umls_user is none)
           or
-          (umls_user | trim == '')
+          (umls_user | trim == "")
           ) 
  
