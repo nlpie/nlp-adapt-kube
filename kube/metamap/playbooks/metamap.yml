@@ -1,0 +1,23 @@
+# ansible-playbook test_ctakes.yml --user=gms --ask-sudo-pass
+---
+- hosts: 127.0.0.1
+  connection: local
+  #sudo: true
+  vars:
+    path_test: ../
+    mm: ../files/public_mm_linux_main_2016v2.tar.bz2
+    java_mm: ../files/public_mm_linux_javaapi_2016v2.tar.bz2
+    uima_mm: ../files/public_mm_uima_2014.zip
+    java_home: /usr/lib/jvm/java-8-openjdk-amd64
+  tasks:
+  - name: Extract MM Main
+    unarchive: src={{mm}}
+               dest={{path_test}}
+  - name: Extract UIMA Main
+    unarchive: src={{uima_mm}}
+               dest={{path_test}}
+  - name: Extract Java Main
+    unarchive: src={{java_mm}}
+               dest={{path_test}}
+  - name: Install MM
+    shell: '../public_mm/bin/install.sh'

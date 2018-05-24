@@ -4,11 +4,11 @@
   connection: local
   #sudo: true
   vars:
-    download_dir: /root
-    ctakes_dir: /root
-    path_test: /ansible/test/ctakes
+    download_dir: ./
+    ctakes_dir: ./ctakes
+    path_test: ./ctakes
     ctakes_url: http://mirror.stjschools.org/public/apache//ctakes/ctakes-4.0.0/apache-ctakes-4.0.0-bin.tar.gz
-    ctakes_src: /root/apache-ctakes-4.0.0-bin.tar.gz
+    ctakes_src: ./apache-ctakes-4.0.0-bin.tar.gz
     env_dir: /etc/environment
     bash_profile: ~/.bash_profile
     bashrc: ~/.bashrc
