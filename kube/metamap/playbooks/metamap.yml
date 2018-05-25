@@ -19,11 +19,11 @@
   - name: Extract MM Main
     unarchive: src={{mm}}
                dest={{path_test}}
-  - name: Extract UIMA Main
-    unarchive: src={{uima_mm}}
-               dest={{path_test}}
-  - name: Extract Java Main
+  - name: Extract Java MM
     unarchive: src={{java_mm}}
+               dest={{path_test}}
+  - name: Extract UIMA MM
+    unarchive: src={{uima_mm}}
                dest={{path_test}}
   - name: Install MM
     shell: './public_mm/bin/install.sh'
