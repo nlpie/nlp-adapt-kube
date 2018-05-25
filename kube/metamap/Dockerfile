@@ -1,6 +1,6 @@
 FROM openjdk:8-jre
 
-ADD /opt/public_mm /opt/public_mm
+ADD public_mm /opt/nlp/public_mm
 
 RUN echo $JAVA_HOME
 
