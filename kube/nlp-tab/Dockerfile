@@ -23,6 +23,8 @@ RUN npm rebuild node-sass
 RUN echo '{ "allow_root": true }' > /root/.bowerrc
 RUN gulp
 
+COPY required/* ./
+
 EXPOSE 8000
  
 CMD ["gulp", "webserver"]

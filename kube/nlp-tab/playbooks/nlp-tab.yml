@@ -1,0 +1,17 @@
+# ansible-playbook test_ctakes.yml --user=gms --ask-sudo-pass
+---
+- hosts: 127.0.0.1
+  connection: local
+  #sudo: true
+  vars:
+    path_test: ../nlptab-webapp
+    nlptab_url: https://github.com/nlpie/nlptab.git
+    java_home: /usr/lib/jvm/java-8-openjdk-amd64
+    user: gms
+  tasks:
+  - git:
+      repo: "{{nlptab_url}}"
+      dest: "{{path_test}}"
+      clone: no
+      update: no
+
