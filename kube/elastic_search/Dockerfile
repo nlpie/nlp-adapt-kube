@@ -1,67 +1,14 @@
-#FROM openjdk:8-jre
+FROM openjdk:8-jre
+# see https://github.com/docker-library/elasticsearch
 
-#RUN adduser --disabled-password elasticsearch
-#WORKDIR /home/elasticsearch
-
-#ADD elasticsearch-2.1.0 ./
-
-#EXPOSE 9200 
-#EXPOSE 9300
-
-# switches allow to run as root and to publish host outside of container
-#ENTRYPOINT [ "bin/elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
-
-# from https://github.com/docker-library/elasticsearch/blob/master/2.4/Dockerfile
-FROM openjdk:8-jre-alpine
-
-# ensure elasticsearch user exists
-RUN addgroup -S elasticsearch && adduser -S -G elasticsearch elasticsearch
-
-# grab su-exec for easy step-down from root
-# and bash for "bin/elasticsearch" among others
-RUN apk add --no-cache 'su-exec>=0.2' bash
-
-# https://artifacts.elastic.co/GPG-KEY-elasticsearch
-ENV GPG_KEY 46095ACC8548582C1A2699A9D27D666CD88E42B4
-
+RUN adduser --disabled-password elasticsearch
 WORKDIR /usr/share/elasticsearch
 ENV PATH /usr/share/elasticsearch/bin:$PATH
 
-ENV ELASTICSEARCH_VERSION 2.1.0
-ENV ELASTICSEARCH_TARBALL="https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.1.0.tar.gz" \
-	ELASTICSEARCH_TARBALL_ASC="https://download.elastic.co/elasticsearch/elasticsearch/elasticsearch-2.1.0.tar.gz.asc" \
-	ELASTICSEARCH_TARBALL_SHA1="791a48fea4112f5648524dbc3011c89e"
+RUN export ES_JAVA_OPTS='-Xms32m -Xmx32m';
+COPY elasticsearch-2.1.0/* ./ 
 
-RUN set -ex; \
-	\
-	apk add --no-cache --virtual .fetch-deps \
-		ca-certificates \
-		gnupg \
-		openssl \
-		tar \
-	; \
-	\
-	wget -O elasticsearch.tar.gz "$ELASTICSEARCH_TARBALL"; \
-	\
-	#if [ "$ELASTICSEARCH_TARBALL_SHA1" ]; then \
-	#	echo "$ELASTICSEARCH_TARBALL_SHA1 *elasticsearch.tar.gz" | sha1sum -c -; \
-	#fi; \
-	\
-	#if [ "$ELASTICSEARCH_TARBALL_ASC" ]; then \
-	#	wget -O elasticsearch.tar.gz.asc "$ELASTICSEARCH_TARBALL_ASC"; \
-	#	export GNUPGHOME="$(mktemp -d)"; \
-	#	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEY"; \
-	#	gpg --batch --verify elasticsearch.tar.gz.asc elasticsearch.tar.gz; \
-	#	rm -rf "$GNUPGHOME" elasticsearch.tar.gz.asc; \
-	#fi; \
-	\
-	tar -xf elasticsearch.tar.gz --strip-components=1; \
-	rm elasticsearch.tar.gz; \
-	\
-	apk del .fetch-deps; \
-	\
-	mkdir -p ./plugins; \
-	for path in \
+RUN	for path in \
 		./data \
 		./logs \
 		./config \
@@ -69,27 +16,17 @@ RUN set -ex; \
 	; do \
 		mkdir -p "$path"; \
 		chown -R elasticsearch:elasticsearch "$path"; \
-	done; \
-	\
-# we shouldn't need much RAM to test --version (default is 2gb, which gets Jenkins in trouble sometimes)
-	export ES_JAVA_OPTS='-Xms32m -Xmx32m'; \
-	if [ "${ELASTICSEARCH_VERSION%%.*}" -gt 1 ]; then \
-		elasticsearch --version; \
-	else \
-# elasticsearch 1.x doesn't support --version
-# but in 5.x, "-v" is verbose (and "-V" is --version)
-		elasticsearch -v; \
-	fi
+	done; 
 
-# copy required files
-COPY required/config/elasticsearch.yml ./config
+COPY required/config ./config
 
-COPY required/plugins/* ./plugins/
+COPY required/plugins/nlptab ./plugins/nlptab
 
-VOLUME /usr/share/elasticsearch/data
+EXPOSE 9200 
+EXPOSE 9300
 
-#COPY docker-entrypoint.sh /
+WORKDIR /data/in
 
-EXPOSE 9200 9300
-#ENTRYPOINT ["/docker-entrypoint.sh"]
-#CMD ["elasticsearch"]
+# switches allow to run as root and to publish host outside of container
+ENTRYPOINT [ "elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
+
