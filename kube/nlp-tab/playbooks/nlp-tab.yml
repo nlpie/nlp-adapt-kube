@@ -4,14 +4,13 @@
   connection: local
   #sudo: true
   vars:
-    path_test: ../nlptab-webapp
-    nlptab_url: https://github.com/nlpie/nlptab.git
-    java_home: /usr/lib/jvm/java-8-openjdk-amd64
+    nlptab_dir: ../nlptab-webapp
+    nlptab_url: https://github.com/nlpie/nlptab-webapp.git
     user: gms
   tasks:
   - git:
       repo: "{{nlptab_url}}"
-      dest: "{{path_test}}"
-      clone: no
-      update: no
+      dest: "{{nlptab_dir}}"
+      clone: yes
+      update: yes
 

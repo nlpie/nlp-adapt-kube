@@ -1,8 +1,6 @@
 FROM openjdk:8-jre
 
-ADD ctakes-distribution /ctakes
-
-RUN echo $JAVA_HOME
+ADD ctakes-distribution /usr/share/ctakes
 
 # set UMLS credentials via environment variable
 RUN echo 'export ctakes_umlsuser=<USER>\nexport ctakes_umlspw=<PW>' >  ~/.bashrc
