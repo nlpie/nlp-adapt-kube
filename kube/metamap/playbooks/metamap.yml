@@ -14,7 +14,7 @@
     mm: ../files/public_mm_linux_main_2016v2.tar.bz2
     java_mm: ../files/public_mm_linux_javaapi_2016v2.tar.bz2
     uima_mm: ../files/public_mm_uima_2014.zip
-    java_home: /usr/lib/jvm/java-8-openjdk-amd64
+    uima: http://archive.apache.org/dist/uima/uimaj-2.10.2/uimaj-2.10.2-bin.tar.gz
   tasks:
   - name: Extract MM Main
     unarchive: src={{mm}}
@@ -26,4 +26,8 @@
     unarchive: src={{uima_mm}}
                dest={{path_test}}
   - name: Install MM
-    shell: './public_mm/bin/install.sh'
+    shell: '/opt/nlp/public_mm/bin/install.sh'
+  - name: Extract UIMA
+    unarchive: src={{uima}}
+               dest={{path_test}}
+               remote_src=true
