@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: biomedicus-wf-    #name of workflow spec
+spec:
+  entrypoint: build          #invoke the build template
+  volumes:
+  - name: test-volume
+    hostPath:
+      path: /Users/gms/development/data/test
+  templates:
+  - name: build              #name of template
+    container:
+      # image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus:1
+      image: horcle/biomedicus
+      imagePullPolicy: IfNotPresent
+      # command: [sh, -c]
+      command: ["/usr/share/biomedicus/bin/runCPE.sh"] 
+      # command: ["$BIOMEDICUS_HOME/bin/runCPE.sh"] 
+      args: ["/usr/share/biomedicus/nlpie/PlainTextCPM_nlpie.xml"]
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+      # args: ["$BIOMEDICUS_HOME/nlpie/PlainTextCPM_nlpie.xml"]
+
+      # resources:                #don't use too much resources
+      #  limits:
+      #    memory: 32Mi
+      #    cpu: 100m

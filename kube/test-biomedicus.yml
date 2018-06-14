@@ -22,11 +22,11 @@ spec:
         name: biomedicus
         volumeMounts:
         - name: volume
-          mountPath: "/data/test"
+          mountPath: "/data"
   
       volumes:
       - name: volume
         hostPath:
-          path: "/data/test"
+          path: "/data"
 
 

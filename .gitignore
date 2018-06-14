@@ -1,3 +1,7 @@
 .DS_Store
 *.swp
 composetest/*
+kube/biomedicus/biomedicus-distribution
+kube/nlp-tab/nlptab-webapp
+config
+
