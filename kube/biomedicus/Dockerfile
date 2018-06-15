@@ -1,8 +1,10 @@
 FROM openjdk:8-jre
 
+RUN apt-get update
+RUN apt-get -qy install zip
+
 ADD biomedicus-distribution /usr/share/biomedicus
 ADD required/nlpie /usr/share/biomedicus/nlpie
-
 
 RUN echo 'export BIOMEDICUS_HOME=/usr/share/biomedicus\nDATA_IN=/data/in\nBIOMEDICUS_OUT=/data/biomedicus_out' >  ~/.bashrc
 
