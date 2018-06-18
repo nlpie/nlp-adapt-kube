@@ -3,5 +3,6 @@
 composetest/*
 kube/biomedicus/biomedicus-distribution
 kube/nlp-tab/nlptab-webapp
+kube/elastic_search/elasticsearch-2.1.0
 config
 

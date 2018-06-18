@@ -10,12 +10,35 @@ spec:
       path: /Users/gms/workspace/test # must match host directory in minikube; cannot be symlinked
   
   templates:
+
   - name: biomedicus-test
     steps:
+    - - name: elastic-server
+        template: elastic-server
+    - - name: elastic-client
+        template: elastic-client
     - - name: build  #name of template
         template: build-out
     - - name: package  
         template: package-out
+
+  - name: elastic-server
+    daemon: true
+    container:
+      image: horcle/elastic
+      imagePullPolicy: Never
+      restartPolicy: Always
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 9200
+
+  - name: elastic-client
+    container:
+      image: horcle/elastic
+      imagePullPolicy: Never
+      command: ["/bin/sh", "-c"]
+      args: ["echo curl 127.0.0.1:9200 && curl 127.0.0.1:9200"]
 
   - name: build-out
     container:

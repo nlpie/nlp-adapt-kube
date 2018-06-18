@@ -18,6 +18,9 @@ RUN	for path in \
 		chown -R elasticsearch:elasticsearch "$path"; \
 	done; 
 
+RUN		mkdir -p /data/elastic \
+		mkdir -p /data/logs/elastic
+
 COPY required/config ./config
 
 COPY required/plugins/nlptab ./plugins/nlptab
