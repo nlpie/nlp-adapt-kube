@@ -1,8 +1,14 @@
 .DS_Store
 *.swp
 composetest/*
+
 kube/biomedicus/biomedicus-distribution
-kube/nlp-tab/nlptab-webapp
 kube/elastic_search/elasticsearch-2.1.0
+kube/amicus/amicus_ditribution
+kube/clamp/ClampCmd_1.4.0
+kube/ctake/ctakes-distribution
+kube/metamap/public_mm
+kube/nlp-tab/nlptab-webapp
+
 config
 

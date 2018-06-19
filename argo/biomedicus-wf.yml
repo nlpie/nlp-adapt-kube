@@ -8,6 +8,7 @@ spec:
   - name: test-volume
     hostPath:
       path: /Users/gms/workspace/test # must match host directory in minikube; cannot be symlinked
+      # path: /Volumes/GrenziData/development/data
   
   templates:
 
@@ -17,10 +18,10 @@ spec:
         template: elastic-server
     - - name: elastic-client
         template: elastic-client
-    - - name: build  #name of template
-        template: build-out
-    - - name: package  
-        template: package-out
+    #- - name: build  #name of template
+    #    template: build-out
+    #- - name: package  
+    #    template: package-out
 
   - name: elastic-server
     daemon: true
@@ -29,9 +30,19 @@ spec:
       imagePullPolicy: Never
       restartPolicy: Always
       readinessProbe:
-        httpGet:
-          path: /
+        tcpSocket:
           port: 9200
+        initialDelaySeconds: 2
+        periodSeconds: 10
+      livenessProbe:
+        tcpSocket:
+          port: 9200
+        initialDelaySeconds: 15
+        periodSeconds: 20
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
 
   - name: elastic-client
     container:
