@@ -31,5 +31,6 @@ EXPOSE 9300
 WORKDIR /data/in
 
 # switches allow to run as root and to publish host outside of container
-ENTRYPOINT [ "elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
+#ENTRYPOINT [ "elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
+CMD [ "elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
 

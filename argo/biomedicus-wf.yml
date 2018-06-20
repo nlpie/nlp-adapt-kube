@@ -29,16 +29,22 @@ spec:
       image: horcle/elastic
       imagePullPolicy: Never
       restartPolicy: Always
-      readinessProbe:
-        tcpSocket:
-          port: 9200
-        initialDelaySeconds: 2
-        periodSeconds: 10
+      ports:
+        - containerPort: 9200
+          name: http
+        - containerPort: 9300
+          name: transport
       livenessProbe:
         tcpSocket:
-          port: 9200
-        initialDelaySeconds: 15
-        periodSeconds: 20
+          port: transport
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      readinessProbe:
+        httpGet:
+          path: /_cluster/health
+          port: http
+        initialDelaySeconds: 20
+        timeoutSeconds: 5      
       volumeMounts:
       - name: test-volume
         mountPath: /data
