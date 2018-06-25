@@ -13,15 +13,42 @@ spec:
   templates:
 
   - name: biomedicus-test
+    #    container:
+    #      image: horcle/elastic
+    #      imagePullPolicy: Never
+    #      command: [sh, -c]
+    #      # Try to read from nginx web server until it comes up
+    #      args: ["until `curl -G 'http://127.0.0.1:9200/' > /tmp/out`; do echo sleep && sleep 1; done && cat /tmp/out"]
+    #    # Create a simple nginx web server
+    #    sidecars:
+    #    - name: elastic
+    #      image: horcle/elastic
+    #      imagePullPolicy: Never
+    #
     steps:
-    - - name: elastic-server
-        template: elastic-server
-    - - name: elastic-client
-        template: elastic-client
-    #- - name: build  #name of template
-    #    template: build-out
-    #- - name: package  
-    #    template: package-out
+         - - name: elastic-server
+             template: elastic-server
+         - - name: elastic-client
+             template: elastic-client
+             arguments:
+               parameters:
+               - name: cmd 
+                 value: curl http://{{steps.elastic-server.ip}}:9200/_cluster/health  
+
+         - - name: build 
+             template: build-out
+         - - name: package  
+             template: package-out
+
+         - - name: nlptab-server
+             template: nlptab-server
+         - - name: nlptab-client
+             template: nlptab-client
+             arguments:
+               parameters:
+               - name: cmd 
+                 value: curl http://{{steps.nlptab-server.ip}}:8000/dist/index.html  
+
 
   - name: elastic-server
     daemon: true
@@ -51,15 +78,20 @@ spec:
         readOnly: false
 
   - name: elastic-client
+    inputs:
+      parameters:
+      - name: cmd
     container:
       image: horcle/elastic
       imagePullPolicy: Never
-      command: ["/bin/sh", "-c"]
-      args: ["echo curl 127.0.0.1:9200 && curl 127.0.0.1:9200"]
+      # command: ["/bin/sh", "-c"]
+      # args: ["echo curl {{steps.influx.ip}}:9200 && curl {{steps.influx.ip}}:9200"]
+      command: ["sh", "-c"]
+      args: ["{{inputs.parameters.cmd}}"]    
 
   - name: build-out
     container:
-      image: horcle/biomedicus
+      image: horcle/biomedicus:2
       imagePullPolicy: Never
       command: ["/usr/share/biomedicus/bin/runCPE.sh"] 
       args: ["/usr/share/biomedicus/nlpie/PlainTextCPM_nlpie.xml"]
@@ -74,7 +106,7 @@ spec:
       
   - name:  package-out           
     container:
-      image: horcle/biomedicus
+      image: horcle/biomedicus:2
       imagePullPolicy: Never
       command: [sh, -c]
       args: ["zip -r /data/biomedicus_out.zip /data/biomedicus_out"]
@@ -82,4 +114,29 @@ spec:
       - name: test-volume
         mountPath: /data
         readOnly: false
+
+
+  - name: nlptab-server
+    daemon: true
+    container:
+      image: horcle/nlptab
+      imagePullPolicy: Never
+      restartPolicy: Always
+      readinessProbe:
+        httpGet:
+          path: /dist/index.html
+          port: 8000
+        initialDelaySeconds: 2
+        timeoutSeconds: 1
+
+  - name: nlptab-client
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: horcle/nlptab
+      imagePullPolicy: Never
+      command: ["sh", "-c"]
+      args: ["{{inputs.parameters.cmd}}"]    
+ 
 

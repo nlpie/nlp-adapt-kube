@@ -3,6 +3,7 @@
 composetest/*
 
 kube/biomedicus/biomedicus-distribution
+kube/biomedicus/biomedicus-distribution-2.0.0-release
 kube/elastic_search/elasticsearch-2.1.0
 kube/amicus/amicus_ditribution
 kube/clamp/ClampCmd_1.4.0
