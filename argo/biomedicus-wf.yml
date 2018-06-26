@@ -125,7 +125,7 @@ spec:
       readinessProbe:
         httpGet:
           path: /dist/index.html
-          port: 8000
+          port: 80000
         initialDelaySeconds: 2
         timeoutSeconds: 1
 
