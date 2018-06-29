@@ -35,11 +35,6 @@ spec:
                - name: cmd 
                  value: curl http://{{steps.elastic-server.ip}}:9200/_cluster/health  
 
-         - - name: build 
-             template: build-out
-         - - name: package  
-             template: package-out
-
          - - name: nlptab-server
              template: nlptab-server
          - - name: nlptab-client
@@ -48,6 +43,12 @@ spec:
                parameters:
                - name: cmd 
                  value: curl http://{{steps.nlptab-server.ip}}:8000/dist/index.html  
+         
+         - - name: build 
+             template: build-out
+         - - name: package  
+             template: package-out
+
 
 
   - name: elastic-server
@@ -125,7 +126,7 @@ spec:
       readinessProbe:
         httpGet:
           path: /dist/index.html
-          port: 80000
+          port: 8000
         initialDelaySeconds: 2
         timeoutSeconds: 1
 
