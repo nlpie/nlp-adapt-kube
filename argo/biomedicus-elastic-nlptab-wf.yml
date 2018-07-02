@@ -1,0 +1,225 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: biomedicus-wf-    #name of workflow spec
+spec:
+  entrypoint: biomedicus-test          #invoke the build template
+  volumes:
+  - name: test-volume
+    hostPath:
+      path: /Users/gms/workspace/test # must match host directory in minikube; cannot be symlinked
+      # path: /Volumes/GrenziData/development/data
+  
+  templates:
+
+  - name: biomedicus-test
+    #    container:
+    #      image: horcle/elastic
+    #      imagePullPolicy: Never
+    #      command: [sh, -c]
+    #      # Try to read from nginx web server until it comes up
+    #      args: ["until `curl -G 'http://127.0.0.1:9200/' > /tmp/out`; do echo sleep && sleep 1; done && cat /tmp/out"]
+    #    # Create a simple nginx web server
+    #    sidecars:
+    #    - name: elastic
+    #      image: horcle/elastic
+    #      imagePullPolicy: Never
+    #
+    steps:
+       - - name: elastic-deployment
+           template: elastic-server-d
+       - - name: elastic-service
+           template: elastic-server-s
+       
+       - - name: build 
+           template: build-out
+       - - name: package  
+           template: package-out
+
+       - - name: nlptab-deployment
+           template: nlptab-server-d
+       - - name: nlptab-service
+           template: nlptab-server-s
+
+       - - name: post
+           template: post-data
+
+  
+  - name: elastic-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: es
+        spec:
+          selector:
+            matchLabels:
+              app: es
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: es
+                track: stable
+          
+            spec:
+              containers:
+              - image: horcle/elastic
+                imagePullPolicy: Never
+                name: es
+                ports:
+                - containerPort: 9200
+                - containerPort: 9300
+                volumeMounts:
+                - name: test-volume
+                  mountPath: /data
+                  readOnly: false  
+              
+              volumes:
+              - name: test-volume
+                hostPath:
+                  path: /Users/gms/workspace/test 
+
+
+  - name: elastic-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: es
+          namespace: default
+          labels:
+            app: es
+
+        spec:
+          selector:
+            app: es
+          ports:
+          - port: 9200
+            targetPort: 9200
+            nodePort: 31345
+          type: NodePort
+       
+  - name: nlptab-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: nlptab
+        spec:
+          selector:
+            matchLabels:
+              app: nlptab
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: nlptab
+                track: stable
+          
+            spec:
+              containers:
+              - image: horcle/nlptab
+                imagePullPolicy: Never
+                name: nlptab
+                ports:
+                - containerPort: 8000
+                volumeMounts:
+                - name: test-volume
+                  mountPath: /data
+                  readOnly: false  
+              
+              volumes:
+              - name: test-volume
+                hostPath:
+                  path: /Users/gms/workspace/test 
+
+
+  - name: nlptab-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: nlptab
+          namespace: default
+          labels:
+            app: nlptab
+
+        spec:
+          selector:
+            app: nlptab
+          ports:
+          - port: 80
+            targetPort: 8000
+            nodePort: 31234
+          type: NodePort
+
+  - name: build-out
+    container:
+      image: horcle/biomedicus
+      imagePullPolicy: Never
+      command: ["/usr/share/biomedicus/bin/runCPE.sh"] 
+      args: ["/usr/share/biomedicus/nlpie/PlainTextCPM_nlpie.xml"]
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+      # resources:                #don't use too much resources
+      #  limits:
+      #    memory: 32Mi
+      #    cpu: 100m
+      
+  - name:  package-out           
+    container:
+      image: horcle/biomedicus
+      imagePullPolicy: Never
+      command: [sh, -c]
+      args: ["zip -r /data/biomedicus_out.zip /data/biomedicus_out"]
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+
+
+  - name: nlptab-server
+    daemon: true
+    container:
+      image: horcle/nlptab
+      imagePullPolicy: Never
+      restartPolicy: Always
+      readinessProbe:
+        httpGet:
+          path: /dist/index.html
+          port: 8000
+        initialDelaySeconds: 2
+        timeoutSeconds: 1
+
+  - name: nlptab-client
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: horcle/nlptab
+      imagePullPolicy: Never
+      command: ["sh", "-c"]
+      args: ["{{inputs.parameters.cmd}}"]    
+ 
+
+  - name: post-data           
+    container:
+      image: horcle/biomedicus
+      imagePullPolicy: Never
+      command: [sh, -c]
+      args: ["zip -r /data/biomedicus_out.zip /data/biomedicus_out"]
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
