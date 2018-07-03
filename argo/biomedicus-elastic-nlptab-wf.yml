@@ -13,18 +13,6 @@ spec:
   templates:
 
   - name: biomedicus-test
-    #    container:
-    #      image: horcle/elastic
-    #      imagePullPolicy: Never
-    #      command: [sh, -c]
-    #      # Try to read from nginx web server until it comes up
-    #      args: ["until `curl -G 'http://127.0.0.1:9200/' > /tmp/out`; do echo sleep && sleep 1; done && cat /tmp/out"]
-    #    # Create a simple nginx web server
-    #    sidecars:
-    #    - name: elastic
-    #      image: horcle/elastic
-    #      imagePullPolicy: Never
-    #
     steps:
        - - name: elastic-deployment
            template: elastic-server-d
@@ -43,6 +31,10 @@ spec:
 
        - - name: post
            template: post-data
+           arguments:
+             artifacts:
+             - name: biomedicus-out
+               from: "{{steps.package.outputs.artifacts.biomedicus-out}}"
 
   
   - name: elastic-server-d
@@ -187,6 +179,10 @@ spec:
       - name: test-volume
         mountPath: /data
         readOnly: false
+    outputs:
+      artifacts:
+      - name: biomedicus-out
+        path: /data/biomedicus_out.zip
 
 
   - name: nlptab-server
@@ -213,12 +209,32 @@ spec:
       args: ["{{inputs.parameters.cmd}}"]    
  
 
-  - name: post-data           
+      #  - name: post-data           
+      #    container:
+      #      image: horcle/elastic
+      #      imagePullPolicy: Never
+      #      command: [sh, -c]
+      #      # args: ["curl -sS -d @- {{steps.influx.ip}}:9200/_nlptab-systemindexmeta"]
+      #      args: ["curl -sS -d @- http://192.168.99.100:31345/_nlptab-systemindexmeta"]
+      #      volumeMounts:
+      #      - name: test-volume
+      #        mountPath: /data
+      #        readOnly: false
+      #
+
+  - name: post-data 
+    inputs:
+        artifacts:
+          # unpack the message input artifact
+          # and put it at /tmp/message
+        - name: biomedicus-out
+          path: /data/biomedicus_out.zip
     container:
       image: horcle/biomedicus
       imagePullPolicy: Never
       command: [sh, -c]
-      args: ["zip -r /data/biomedicus_out.zip /data/biomedicus_out"]
+      args: ["curl -sS -d /data/biomedicus_out.zip http://192.168.99.100:31345/_nlptab-systemindexmeta"]
+      # args: ["curl -sS -d @- http://192.168.99.100:31345/_nlptab-systemindexmeta"]
       volumeMounts:
       - name: test-volume
         mountPath: /data
