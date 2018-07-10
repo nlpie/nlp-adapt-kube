@@ -22,7 +22,7 @@ docker save horcle/nlptab | pv | (eval $(minikube docker-env) && docker load)
 eval $(minikube docker-env)
 
 # TODO: test as replacement to manual edit of yml with inserted chucnk below
-kubectl apply -f ~/development/nlp/nlpie/nlp-adapt/kube-minio-configmap.yml
+kubectl apply -f ~/development/nlp/nlpie/nlp-adapt/kube/kube-minio-configmap.yml
 # NB: need to issue command right after starting minikube
 
 # kubectl edit configmap workflow-controller-configmap -n kube-system
