@@ -14,27 +14,27 @@ spec:
 
   - name: biomedicus-test
     steps:
-       - - name: elastic-deployment
-           template: elastic-server-d
-       - - name: elastic-service
-           template: elastic-server-s
+      #- - name: elastic-deployment
+      #     template: elastic-server-d
+      # - - name: elastic-service
+      #     template: elastic-server-s
        
-       - - name: build 
-           template: build-out
-       - - name: package  
-           template: package-out
+           #- - name: build 
+           #- - template: build-out
+           #- - name: package  
+           #- - template: package-out
 
        - - name: nlptab-deployment
            template: nlptab-server-d
        - - name: nlptab-service
            template: nlptab-server-s
 
-       - - name: post
-           template: post-data
-           arguments:
-             artifacts:
-             - name: biomedicus-out
-               from: "{{steps.package.outputs.artifacts.biomedicus-out}}"
+           #- - name: post
+           #- - template: post-data
+           #- - arguments:
+           #- -   artifacts:
+           #- -   - name: biomedicus-out
+           #- -     from: "{{steps.package.outputs.artifacts.biomedicus-out}}"
 
   
   - name: elastic-server-d

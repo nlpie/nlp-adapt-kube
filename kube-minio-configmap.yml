@@ -1,0 +1,29 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+data:
+  config: |
+    artifactRepository: {}
+    executorImage: argoproj/argoexec:v2.1.1
+    artifactRepository:
+      s3:
+        bucket: my-bucket
+        keyPrefix: prefix/in/bucket
+        endpoint: my-minio-endpoint.default:9000
+        insecure: true
+        accessKeySecret:
+          name: my-minio-cred
+          key: accesskey
+        secretKeySecret:
+          name: my-minio-cred
+          key: secretkey
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2018-07-05T21:03:48Z
+  name: workflow-controller-configmap
+  namespace: kube-system
+  resourceVersion: "2123"
+  selfLink: /api/v1/namespaces/kube-system/configmaps/workflow-controller-configmap
+  uid: e94fd38b-8096-11e8-b7da-080027f56fbe
