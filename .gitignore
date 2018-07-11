@@ -1,6 +1,6 @@
 .DS_Store
 *.swp
-composetest/*
+kube_test/*
 
 kube/biomedicus/biomedicus-distribution
 kube/biomedicus/biomedicus-distribution-2.0.0-release
@@ -9,6 +9,7 @@ kube/amicus/amicus_ditribution
 kube/clamp/ClampCmd_1.4.0
 kube/ctake/ctakes-distribution
 kube/metamap/public_mm
+kube/metamap/apache-uima
 kube/nlp-tab/nlptab-webapp
 
 config
