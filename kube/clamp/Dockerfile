@@ -2,8 +2,10 @@ FROM openjdk:8-jre
 
 ADD ClampCmd_1.4.0 /usr/share/clamp
 ADD required/nlpie /usr/share/clamp/nlpie
+ADD required/scripts /usr/share/clamp/scripts
 
-RUN echo 'export clamp_umlsuser=<USER>\nexport clamp_umlspw=<PW>\nCLAMP_HOME=/usr/share/clamp\nDATA_IN=/data/in\nCTAKES_OUT=/data/clamp_out' >  ~/.bashrc
+RUN chmod 755 /usr/share/clamp/scripts/run_ctakes.sh
+RUN chmod 755 /usr/share/clamp/scripts/umls.sh
 
 WORKDIR /data/in
 

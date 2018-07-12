@@ -12,30 +12,29 @@ spec:
   
   templates:
 
-  - name: biomedicus-test
+  - name: nlp-adapt
     steps:
-      #- - name: elastic-deployment
-      #     template: elastic-server-d
-      # - - name: elastic-service
-      #     template: elastic-server-s
+      - - name: elastic-deployment
+           template: elastic-server-d
+       - - name: elastic-service
+           template: elastic-server-s
        
-           #- - name: build 
-           #- - template: build-out
-           #- - name: package  
-           #- - template: package-out
-
        - - name: nlptab-deployment
            template: nlptab-server-d
        - - name: nlptab-service
            template: nlptab-server-s
+          
+       - - name: biomedicus
+           template: run-biomedicus
 
-           #- - name: post
-           #- - template: post-data
-           #- - arguments:
-           #- -   artifacts:
-           #- -   - name: biomedicus-out
-           #- -     from: "{{steps.package.outputs.artifacts.biomedicus-out}}"
+       - - name: metamap 
+           template: run-metamap
 
+       - - name: ctakes 
+           template: run-ctakes
+       
+       - - name: clamp 
+           template: run-clamp
   
   - name: elastic-server-d
     resource:
@@ -154,87 +153,41 @@ spec:
             nodePort: 31234
           type: NodePort
 
-  - name: build-out
+  - name: run-biomedicus
     container:
       image: horcle/biomedicus
       imagePullPolicy: Never
-      command: ["/usr/share/biomedicus/bin/runCPE.sh"] 
-      args: ["/usr/share/biomedicus/nlpie/PlainTextCPM_nlpie.xml"]
+      command: ["/usr/share/biomedicus/scripts/run_biomedicus.sh"] 
       volumeMounts:
       - name: test-volume
         mountPath: /data
         readOnly: false
-      # resources:                #don't use too much resources
-      #  limits:
-      #    memory: 32Mi
-      #    cpu: 100m
-      
-  - name:  package-out           
+
+  - name: run-metamap
     container:
-      image: horcle/biomedicus
+      image: horcle/metamap
       imagePullPolicy: Never
-      command: [sh, -c]
-      args: ["zip -r /data/biomedicus_out.zip /data/biomedicus_out"]
+      command: ["/usr/share/biomedicus/scripts/run_metamap.sh"] 
       volumeMounts:
       - name: test-volume
         mountPath: /data
         readOnly: false
-    outputs:
-      artifacts:
-      - name: biomedicus-out
-        path: /data/biomedicus_out.zip
 
-
-  - name: nlptab-server
-    daemon: true
+  - name: run-ctakes
     container:
-      image: horcle/nlptab
+      image: horcle/ctakes
       imagePullPolicy: Never
-      restartPolicy: Always
-      readinessProbe:
-        httpGet:
-          path: /dist/index.html
-          port: 8000
-        initialDelaySeconds: 2
-        timeoutSeconds: 1
+      command: ["/usr/share/biomedicus/scripts/run_ctakes.sh"] 
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
 
-  - name: nlptab-client
-    inputs:
-      parameters:
-      - name: cmd
+  - name: run-clamp
     container:
-      image: horcle/nlptab
+      image: horcle/clamp
       imagePullPolicy: Never
-      command: ["sh", "-c"]
-      args: ["{{inputs.parameters.cmd}}"]    
- 
-
-      #  - name: post-data           
-      #    container:
-      #      image: horcle/elastic
-      #      imagePullPolicy: Never
-      #      command: [sh, -c]
-      #      # args: ["curl -sS -d @- {{steps.influx.ip}}:9200/_nlptab-systemindexmeta"]
-      #      args: ["curl -sS -d @- http://192.168.99.100:31345/_nlptab-systemindexmeta"]
-      #      volumeMounts:
-      #      - name: test-volume
-      #        mountPath: /data
-      #        readOnly: false
-      #
-
-  - name: post-data 
-    inputs:
-        artifacts:
-          # unpack the message input artifact
-          # and put it at /tmp/message
-        - name: biomedicus-out
-          path: /data/biomedicus_out.zip
-    container:
-      image: horcle/biomedicus
-      imagePullPolicy: Never
-      command: [sh, -c]
-      args: ["curl -sS -d /data/biomedicus_out.zip http://192.168.99.100:31345/_nlptab-systemindexmeta"]
-      # args: ["curl -sS -d @- http://192.168.99.100:31345/_nlptab-systemindexmeta"]
+      command: ["/usr/share/biomedicus/scripts/run_clamp.sh"] 
       volumeMounts:
       - name: test-volume
         mountPath: /data

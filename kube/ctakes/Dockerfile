@@ -1,11 +1,14 @@
 FROM openjdk:8-jre
 
+RUN apt-get update
+RUN apt-get -qy install zip
+RUN apt-get -qy install jq 
+
 ADD ctakes-distribution /usr/share/ctakes
+ADD required/scripts /usr/share/biomedicus/scripts
 
-# set UMLS credentials via environment variable
-RUN echo 'export ctakes_umlsuser=<USER>\nexport ctakes_umlspw=<PW>\nCTAKES_HOME=/usr/share/ctakes\nDATA_IN=/data/in\nCTAKES_OUT=/data/ctakes_out' >  ~/.bashrc
-
-# ENTRYPOINT ["bin/runClinicalPipeline  -i /data/in  --xmiOut /data/ctakes/out  --user umlsUsername  --pass umlsPassword"]
+RUN chmod 755 /usr/share/biomedicus/scripts/run_ctakes.sh
+RUN chmod 755 /usr/share/biomedicus/scripts/umls.sh
 
 WORKDIR /data/in
 
