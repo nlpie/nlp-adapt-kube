@@ -1,14 +1,12 @@
 ##### Run CLAMP #####
 
-source /usr/share/clamp/scripts/umls.sh
-
-export DATA_DIRECTORY=/usr/share/host_data
+export DATA_DIRECTORY=/data
 export DATA_IN=$DATA_DIRECTORY/in
-
+export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export CLAMP_OUT=$DATA_DIRECTORY/clamp_out
 
 mkdir -p $CLAMP_OUT
-$CLAMP_HOME/nlpie/run_nlpie_pipeline.sh
+# $CLAMP_HOME/nlpie/run_nlpie_pipeline.sh
 
 ##### Create Archive for NLP-TAB #####
 rm $CLAMP_OUT/*.txt

@@ -7,7 +7,9 @@ kube/biomedicus/biomedicus-distribution-2.0.0-release
 kube/elastic_search/elasticsearch-2.1.0
 kube/amicus/amicus_ditribution
 kube/clamp/ClampCmd_1.4.0
-kube/ctake/ctakes-distribution
+kube/clamp/clamp
+kube/clamp/clamp.tar.gz
+kube/ctakes/ctakes-distribution
 kube/metamap/public_mm
 kube/metamap/apache-uima
 kube/nlp-tab/nlptab-webapp
