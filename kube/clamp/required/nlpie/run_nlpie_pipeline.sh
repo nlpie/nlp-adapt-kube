@@ -2,8 +2,8 @@
 
 set -x
 
-umlsUser=$ctakes_umlsuser
-umlsPass=$ctakes_umlspw
+umlsUser="user"
+umlsPass="pw"
 
 input=$DATA_IN
 output=$CLAMP_OUT

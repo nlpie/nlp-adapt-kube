@@ -1,9 +1,10 @@
 ##### Run cTAKES #####
 
-source /usr/share/ctakes/umls.sh
+source /usr/share/ctakes/scripts/umls.sh
 export CTAKES_HOME=/usr/share/ctakes
 export DATA_DIRECTORY=/data
 export DATA_IN=$DATA_DIRECTORY/in
+export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export CTAKES_OUT=$DATA_DIRECTORY/ctakes_out
 
 $CTAKES_HOME/bin/runClinicalPipeline.sh -i $DATA_IN --xmiOut $CTAKES_OUT
