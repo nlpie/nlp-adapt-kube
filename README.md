@@ -1,12 +1,12 @@
 # University of Minnesota NLP-ADAPT (Artifact Discovery and Preparation Toolkit)
 
 
-The Artifact Discovery and Preparation Toolkit Kube (NLP-ADAPT-Kube) allows researches to increase the scale of the tools found in the [NLP-ADAPT VM](https://github.com/nlpie/nlp-adapt) for inter-system comparisons and ensembling of multiple annotator engines for processing large volumes of data.
+The Artifact Discovery and Preparation Toolkit Kubernetes Cluster (NLP-ADAPT-Kube) is deisgned to allow researchers to increase the scale of the tools found in the [NLP-ADAPT VM](https://github.com/nlpie/nlp-adapt) for processing larger volumes of data for inter-system comparisons and ensembling of multiple annotator engines.
 
 ### Project Goals
 Scalability and performance. Ultimately, NLP-ADAPT-Kube will allow researchers to distribute annotator engine processing in parallel across multiple systems. 
 
-Usability. We also simplify the process for deploying a kubernetes cluster: We try to minimize system administrative tasks by utilizing minimal utilities, including
+Usability. We simplify the process of deploying a kubernetes cluster: We try to minimize system administrative tasks by utilizing minimal utilities, including
 
 - `ansible-playbook` for building local dependencies
 - `docker` for building Docker images
