@@ -1,19 +1,20 @@
 .DS_Store
 *.swp
-kube_test/*
+docker_test/*
 
-kube/biomedicus/biomedicus-distribution
-kube/biomedicus/biomedicus-distribution-2.0.0-release
-kube/biomedicus/biomedicus.tar.gz
-kube/elastic_search/elasticsearch-2.1.0
-kube/amicus/amicus_ditribution
-kube/clamp/ClampCmd_1.4.0
-kube/clamp/clamp
-kube/clamp/clamp.tar.gz
-kube/ctakes/ctakes-distribution
-kube/metamap/public_mm
-kube/metamap/apache-uima
-kube/nlp-tab/nlptab-webapp
+docker/biomedicus/biomedicus-distribution
+docker/biomedicus/biomedicus-distribution-2.0.0-release
+docker/biomedicus/biomedicus.tar.gz
+docker/elastic_search/elasticsearch-2.1.0
+docker/amicus/amicus_ditribution
+docker/clamp/ClampCmd_1.4.0
+docker/clamp/clamp
+docker/clamp/clamp.tar.gz
+docker/ctakes/ctakes-distribution
+docker/metamap/public_mm
+docker/metamap/apache-uima
+docker/nlp-tab/nlptab-webapp
+docker/amicus/amicus-distribution
 
 config
 
