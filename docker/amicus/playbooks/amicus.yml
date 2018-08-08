@@ -1,0 +1,15 @@
+# ansible-playbook test_ctakes.yml --user=gms --ask-sudo-pass
+---
+- hosts: 127.0.0.1
+  connection: local
+  #sudo: true
+  vars:
+    path_test: ../amicus-distribution
+    amicus_url: https://github.com/nlpie/amicus.git
+    #user: gms
+  tasks:
+  - git:
+      repo: "{{amicus_url}}"
+      dest: "{{path_test}}"
+      clone: yes
+      update: yes
