@@ -10,13 +10,11 @@ export JAVA_TOOL_OPTIONS='-Xms2G -Xmx6G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
 
 ##### Start Metamap Tagger Servers #####
 skrmedpostctl start
-/bin/sleep 120
 wsdserverctl start
-/bin/sleep 120
 mmserver &
 
 # ensure mmserver has started
-/bin/sleep 120
+#/bin/sleep 120
 
 ##### Run UIMA against Metamap taggers #####
 #source ./setup_uima.sh
