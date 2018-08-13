@@ -1,9 +1,8 @@
 {
 	"auths": {
-		"https://index.docker.io/v1/": {
-			"Username": "user"
+		"https://ahc-nlpie-docker.artifactory.umn.edu": {
+			"Username": "user",
 			"Secret": "pw"
-			
 		}
 	},
 	"HttpHeaders": {

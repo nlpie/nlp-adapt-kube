@@ -254,7 +254,7 @@
             <supertypeName>uima.tcas.Annotation</supertypeName>
             <features>
                 <featureDescription>
-                    <name>type</name>
+                    <name>indefiniteQuantifierType</name>
                     <description>Automatically generated feature</description>
                     <rangeTypeName>uima.cas.String</rangeTypeName>
                 </featureDescription>
@@ -894,11 +894,6 @@
                     <rangeTypeName>uima.cas.Boolean</rangeTypeName>
                 </featureDescription>
             </features>
-        </typeDescription>
-        <typeDescription>
-            <name>biomedicus.v2.rtf.TableInParagraph</name>
-            <description>Automatically generated type from edu.umn.biomedicus.rtf.TableInParagraph</description>
-            <supertypeName>uima.tcas.Annotation</supertypeName>
         </typeDescription>
         <typeDescription>
             <name>biomedicus.v2.rtf.TableRowFormattingDefaults</name>
