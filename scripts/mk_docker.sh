@@ -6,31 +6,42 @@
 
 docker images
 
-echo "building biomedicus container"
-cd kube/biomedicus
+echo "Begin building biomedicus container..."
+cd docker/biomedicus
 docker build -t horcle/biomedicus .
+echo "end biomedicus"
 
-echo "building clamp container"
+echo "Begin building clamp container..."
 cd ../clamp
 docker build -t horcle/clamp .
+echo "end clamp"
 
-echo "building ctakes container"
+echo "Begin building ctakes container..."
 cd ../ctakes
 docker build -t horcle/ctakes .
+echo "end ctakes"
 
-echo "building metamap container"
+echo Begin "building metamap container..."
 cd ../metamap
 docker build -t horcle/metamap .
+echo "end metamap"
 
-echo "building elastic container"
+echo "building elastic container..."
 cd ../elastic_search
 docker build -t horcle/elastic .
+echo "end elastic"
 
-echo "building nlp-tab-webapp container"
+echo "Begin building nlp-tab-webapp container..."
 cd ../nlp-tab
 docker build -t horcle/nlptab .
+echo "end nlptab"
 
-echo "images in minikube env"
+echo "Begin building amicus container..."
+cd ../amicus
+docker build -t horcle/amicus .
+echo "end amicus"
+
+echo "List images in minikube env"
 docker images
 
 

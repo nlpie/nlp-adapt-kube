@@ -4,6 +4,7 @@ docker_test/*
 
 docker/biomedicus/biomedicus-distribution
 docker/biomedicus/biomedicus-distribution-2.0.0-release
+docker/biomedicus/biomedicus-distribution-2.0.1-release
 docker/biomedicus/biomedicus.tar.gz
 docker/elastic_search/elasticsearch-2.1.0
 docker/amicus/amicus_ditribution

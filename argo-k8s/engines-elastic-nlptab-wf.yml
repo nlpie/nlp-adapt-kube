@@ -18,14 +18,14 @@ spec:
         template: elastic-server-d
     - - name: elastic-service
         template: elastic-server-s
-   
+
     - - name: nlptab-deployment
         template: nlptab-server-d
     - - name: nlptab-service
         template: nlptab-server-s
-     
+ 
     - - name: biomedicus
-        template: run-biomedicus
+    template: run-biomedicus
 
     - - name: metamap 
         template: run-metamap
@@ -157,6 +157,8 @@ spec:
     container:
       image: horcle/biomedicus
       imagePullPolicy: Never
+      tty: true
+      stdin: true
       command: ["/usr/share/biomedicus/scripts/run_biomedicus.sh"] 
       volumeMounts:
       - name: test-volume
@@ -167,6 +169,8 @@ spec:
     container:
       image: horcle/metamap
       imagePullPolicy: Never
+      tty: true
+      stdin: true
       command: ["/usr/share/public_mm/scripts/run_metamap.sh"] 
       volumeMounts:
       - name: test-volume
@@ -177,6 +181,8 @@ spec:
     container:
       image: horcle/ctakes
       imagePullPolicy: Never
+      tty: true
+      stdin: true
       command: ["/usr/share/ctakes/scripts/run_ctakes.sh"] 
       volumeMounts:
       - name: test-volume
@@ -187,8 +193,11 @@ spec:
     container:
       image: horcle/clamp
       imagePullPolicy: Never
+      tty: true
+      stdin: true
       command: ["/usr/share/clamp/scripts/run_clamp.sh"] 
       volumeMounts:
       - name: test-volume
         mountPath: /data
         readOnly: false
+
