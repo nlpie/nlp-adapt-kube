@@ -15,9 +15,9 @@ Usability: We simplify the process of deploying a kubernetes cluster: We try to 
 
 ### Status of Project
 
-NLP-ADAPT-Kube is currently in proof of concept and testing. We have utilized MiniKube VM for to simulating a Kubernetes cluster to develop and test serial processing capabilities within our workflow on a single device.
+NLP-ADAPT-Kube is currently in proof of concept and testing. We have utilized MiniKube VM for to simulate a single node Kubernetes cluster in order to develop and test processing capabilities within our workflow on a single device.
 
-We will move from use of single machine using MiniKube VM  to native Linux OS access using virtualized Kubernetes overlay network to manage internal requests within the workflow. The other significant change is that nlp-annotation will occur in parallel across nodes.
+We will move from use of single machine using MiniKube VM to native Linux OS access using virtualized Kubernetes overlay network to manage internal requests within the workflow. The other significant change is that nlp-annotation will occur in parallel across nodes.
 
 
 
