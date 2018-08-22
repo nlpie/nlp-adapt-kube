@@ -195,14 +195,11 @@ spec:
       imagePullPolicy: Never
       tty: true
       stdin: true
-<<<<<<< HEAD:argo-k8s/engines-elastic-nlptab-wf.yml
       env:
         - name: ctakes_umlspw          
           value: "UMLS PW HERE"
         - name: ctakes_umlsuser          
           value: "UMLS USER HERE"
-=======
->>>>>>> ed5783e1aa92e15765419f229eb2ab0fceefddfd:argo-k8s/engines-elastic-nlptab-wf.yml
       command: ["/usr/share/clamp/scripts/run_clamp.sh"] 
       volumeMounts:
       - name: test-volume
