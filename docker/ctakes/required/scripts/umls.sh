@@ -1,2 +1,2 @@
-export ctakes_umlsuser="horcle"
-export ctakes_umlspw="nEj123456"
+export ctakes_umlsuser="user here"
+export ctakes_umlspw="pw here"
