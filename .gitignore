@@ -12,6 +12,7 @@ docker/clamp/ClampCmd_1.4.0
 docker/clamp/clamp
 docker/clamp/clamp.tar.gz
 docker/ctakes/ctakes-distribution
+docker/ctake/required/scripts/umls.sh
 docker/metamap/public_mm
 docker/metamap/apache-uima
 docker/nlp-tab/nlptab-webapp
