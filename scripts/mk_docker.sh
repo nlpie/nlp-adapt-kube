@@ -6,39 +6,39 @@
 
 docker images
 
-echo "Begin building biomedicus container..."
+echo "Begin building biomedicus image..."
 cd docker/biomedicus
-docker build -t horcle/biomedicus .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/biomedicus .
 echo "end biomedicus"
 
-echo "Begin building clamp container..."
+echo "Begin building clamp image..."
 cd ../clamp
-docker build -t horcle/clamp .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/clamp .
 echo "end clamp"
 
-echo "Begin building ctakes container..."
+echo "Begin building ctakes image..."
 cd ../ctakes
-docker build -t horcle/ctakes .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/ctakes .
 echo "end ctakes"
 
-echo Begin "building metamap container..."
+echo Begin "building metamap image..."
 cd ../metamap
-docker build -t horcle/metamap .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/metamap .
 echo "end metamap"
 
-echo "building elastic container..."
+echo "building elastic image..."
 cd ../elastic_search
-docker build -t horcle/elastic .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/elastic .
 echo "end elastic"
 
-echo "Begin building nlp-tab-webapp container..."
+echo "Begin building nlp-tab-webapp image..."
 cd ../nlp-tab
-docker build -t horcle/nlptab .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/nlptab .
 echo "end nlptab"
 
-echo "Begin building amicus container..."
+echo "Begin building amicus image..."
 cd ../amicus
-docker build -t horcle/amicus .
+docker build -t ahc-nlpie-docker.artifactory.umn.edu/amicus .
 echo "end amicus"
 
 echo "List images in minikube env"
