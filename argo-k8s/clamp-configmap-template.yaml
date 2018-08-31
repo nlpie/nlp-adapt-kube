@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  charset.cnf: |
+    [CLAMPLicense]
+	copyId = <from CLAMP.LICENSE>
+	email = <from CLAMP.LICENSE>
+	sn = <from CLAMP.LICENSE>
+	version = <from CLAMP.LICENSE>
+	dateStr = <from CLAMP.LICENSE>
+	checksum = <from CLAMP.LICENSE>
+
+kind: ConfigMap
+metadata:
+  name: clamp-configmap
+

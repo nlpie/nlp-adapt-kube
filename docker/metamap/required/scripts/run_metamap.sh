@@ -13,13 +13,9 @@ skrmedpostctl start
 wsdserverctl start
 mmserver &
 
-# ensure mmserver has started
-#/bin/sleep 120
-
-##### Run UIMA against Metamap taggers #####
+# TODO 
 #source ./setup_uima.sh
 
-# TODO: why don't environment variables carry in Docker???
 BASEDIR=/usr/share/public_mm
 export BASEDIR
 
@@ -74,12 +70,5 @@ pushd $METAMAP_OUT
 zip $METAMAP_OUT -@ < $SAMPLE_FILE
 popd
 
-##### Create Metamap NLP-TAB profile and upload archive #####
-METAMAP_META='{"systemName":"MetaMap", "systemDescription":"MetaMap UIMA annotation engine", "instance":"default"}'
-RESPONSE=$(echo $METAMAP_META | curl -sS -d @- http://192.168.99.100:31345/_nlptab-systemindexmeta)
-
-echo $RESPONSE
-
-curl -sS --data-binary @$METAMAP_OUT.zip -H 'Content-Type: application/zip' "http://192.168.99.100:31345/_nlptab-systemindex?instance=default&index=$(echo $RESPONSE | jq -r .index)&useXCas=false"
 
 

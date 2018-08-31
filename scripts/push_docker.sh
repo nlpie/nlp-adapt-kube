@@ -1,18 +1,40 @@
 #!/bin/bash
 
-export REPO_NAME="ahc-nlpie-docker"
-export ARTIFACTORY_HOST=artifactory.umn.edu
+#minikube --memory 3000 --cpus 2 start
 
-# https://github.com/docker/for-mac/issues/1540#issuecomment-304280880
-#docker login ${REPO_NAME}.${ARTIFACTORY_HOST}
+#eval $(minikube docker-env)
 
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/biomedicus
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/ctakes
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/clamp
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/metamap
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/nlptab
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/elastic
-docker push ${REPO_NAME}.${ARTIFACTORY_HOST}/amicus
+docker login ahc-nlpie-docker.artifactory.umn.edu/biomedicus 
+docker images
 
-# to use private repo in K8s: https://blog.cloudhelix.io/using-a-private-docker-registry-with-kubernetes-f8d5f6b8f646
+echo "Begin uploading biomedicus image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/biomedicus 
+echo "end biomedicus"
+
+echo "Begin uploading clamp image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/clamp 
+echo "end clamp"
+
+echo "Begin uploading ctakes image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/ctakes 
+echo "end ctakes"
+
+echo Begin "uploading metamap image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/metamap 
+echo "end metamap"
+
+echo "uploading elastic image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/elastic 
+echo "end elastic"
+
+echo "Begin uploading nlpab-webapp image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/nlptab 
+echo "end nlptab"
+
+echo "Begin uploading amicus image..."
+docker push ahc-nlpie-docker.artifactory.umn.edu/amicus 
+echo "end amicus"
+
+
+
 
