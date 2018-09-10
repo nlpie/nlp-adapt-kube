@@ -24,4 +24,3 @@ fi
 zip $CLAMP_OUT -@ < $SAMPLE_FILE
 popd
 
-

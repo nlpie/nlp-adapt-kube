@@ -6,8 +6,8 @@ DATA_DIRECTORY=/data
 DATA_IN=$DATA_DIRECTORY/in
 CLAMP_HOME=/usr/share/clamp
 CLAMP_OUT=$DATA_DIRECTORY/clamp_out
-umlsUser="user"
-umlsPass="pw"
+umlsUser=$umlsUser
+umlsPass=$umlsPass
 input=$DATA_IN
 output=$CLAMP_OUT
 
