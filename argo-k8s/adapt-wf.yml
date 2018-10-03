@@ -1,0 +1,108 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: run-adapt          #invoke the build template
+  volumes:
+  - name: test-volume
+    hostPath: # change this accordingly to your host system
+      path: /home/gms/projects/trauma 
+  - name: clamp-volume
+    configMap:
+      name: clamp-configmap 
+
+  templates:
+  - name: run-adapt
+    steps:
+    - - name: run-clamp
+        template: run-clamp
+      - name: run-others
+        template: run-others
+
+  - name: run-clamp # single '-' run steps in parallel, double '--' run serially
+    container: # run container; needed separately from others to use volume-mount for configmap
+      image: ahc-nlpie-docker.artifactory.umn.edu/clamp
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      env:
+        - name: umlsUser
+          value: "credentials here"
+        - name: umlsPass
+          value: "credentials here"
+      command: ["/bin/bash","-c","cp /tmp/mountpath/CLAMP.LICENSE /usr/share/clamp/ && /usr/share/clamp/scripts/run_clamp.sh"]
+      volumeMounts:
+      - name: clamp-volume
+        mountPath: "/tmp/mountpath"
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+
+  - name: run-others # run steps
+    steps:
+    - - name: biomedicus
+        template: run-biomedicus
+
+      - name: metamap 
+        template: run-metamap
+
+      - name: ctakes 
+        template: run-ctakes
+    
+    - - name: amicus
+        template: amicus
+
+  - name: run-biomedicus # templates
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      command: ["/usr/share/biomedicus/scripts/run_biomedicus.sh"] 
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+
+  - name: run-metamap
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/metamap
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      command: ["/usr/share/public_mm/scripts/run_metamap.sh"] 
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+
+  - name: run-ctakes
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/ctakes
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      env:
+        - name: ctakes_umlspw          
+          value: "credentials here"
+        - name: ctakes_umlsuser          
+          value: "credentials here"
+      command: ["/usr/share/ctakes/scripts/run_ctakes.sh"] 
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
+
+
+  - name: run-amicus
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/amicus
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      command: ["/usr/share/public_mm/scripts/run_amicus.sh"] 
+      volumeMounts:
+      - name: test-volume
+        mountPath: /data
+        readOnly: false
