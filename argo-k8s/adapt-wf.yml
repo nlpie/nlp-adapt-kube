@@ -84,9 +84,9 @@ spec:
       tty: true
       stdin: true
       env:
-        - name: ctakes_umlspw          
-          value: "credentials here"
         - name: ctakes_umlsuser          
+          value: "credentials here"
+        - name: ctakes_umlspw          
           value: "credentials here"
       command: ["/usr/share/ctakes/scripts/run_ctakes.sh"] 
       volumeMounts:
