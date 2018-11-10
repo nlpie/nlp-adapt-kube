@@ -10,4 +10,4 @@ ADD required/scripts /usr/share/biomedicus/scripts
 
 RUN chmod 755 /usr/share/biomedicus/scripts/run_biomedicus.sh
 
-WORKDIR /data/in
+WORKDIR /data/data_in

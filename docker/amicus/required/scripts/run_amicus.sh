@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # --- RUN ---
-if [ -f /data/in/export.yml ]; then
+if [ -f /data/data_in/export.yml ]; then
     java -jar /usr/share/amicus/amicus.jar /data/in/export.yml
 else
 <<<<<<< HEAD

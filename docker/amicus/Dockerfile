@@ -14,5 +14,5 @@ RUN ./build.sh
 
 RUN chmod 755 /usr/share/amicus/scripts/run_amicus.sh
 
-WORKDIR /data/in
+WORKDIR /data/data_in
 
