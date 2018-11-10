@@ -6,7 +6,7 @@ export DATA_DIRECTORY=/data
 export BIOMEDICUS_HOME=/usr/share/biomedicus
 export BIOMEDICUS_OUT=$DATA_DIRECTORY/biomedicus_out
 export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
-export DATA_IN=$DATA_DIRECTORY/in
+export DATA_IN=$DATA_DIRECTORY/data_in
 
 $BIOMEDICUS_HOME/bin/runCPE.sh $BIOMEDICUS_HOME/nlpie/PlainTextCPM_nlpie.xml
 

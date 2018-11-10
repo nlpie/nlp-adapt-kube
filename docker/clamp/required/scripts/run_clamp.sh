@@ -1,8 +1,9 @@
 #!/bin/bash
 ##### Run CLAMP #####
+:w
 
 export DATA_DIRECTORY=/data
-export DATA_IN=$DATA_DIRECTORY/in
+export DATA_IN=$DATA_DIRECTORY/data_in
 export CLAMP_HOME=/usr/share/clamp
 export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export CLAMP_OUT=$DATA_DIRECTORY/clamp_out

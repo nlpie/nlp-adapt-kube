@@ -10,5 +10,5 @@ ADD required/scripts /usr/share/ctakes/scripts
 RUN chmod 755 /usr/share/ctakes/scripts/run_ctakes.sh
 RUN chmod 755 /usr/share/ctakes/scripts/umls.sh
 
-WORKDIR /data/in
+WORKDIR /data/data_in
 

@@ -3,7 +3,7 @@
 
 export CTAKES_HOME=/usr/share/ctakes
 export DATA_DIRECTORY=/data
-export DATA_IN=$DATA_DIRECTORY/in
+export DATA_IN=$DATA_DIRECTORY/data_in
 export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export CTAKES_OUT=$DATA_DIRECTORY/ctakes_out
 
