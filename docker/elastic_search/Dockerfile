@@ -30,7 +30,7 @@ COPY required/plugins/nlptab ./plugins/nlptab
 EXPOSE 9200 
 EXPOSE 9300
 
-WORKDIR /data/in
+WORKDIR /data/data_in
 
 # switches allow to run as root and to publish host outside of container
 ENTRYPOINT [ "elasticsearch", "-Des.insecure.allow.root=true", "--network.host", "_non_loopback_" ]
