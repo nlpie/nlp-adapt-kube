@@ -3,7 +3,7 @@
 set -x
 
 DATA_DIRECTORY=/data
-DATA_IN=$DATA_DIRECTORY/in
+DATA_IN=$DATA_DIRECTORY/data_in
 CLAMP_HOME=/usr/share/clamp
 CLAMP_OUT=$DATA_DIRECTORY/clamp_out
 umlsUser=$umlsUser

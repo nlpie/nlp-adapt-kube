@@ -26,7 +26,7 @@
         <nameValuePair>
           <name>InputDirectory</name>
           <value>
-            <string>/data/in</string>
+            <string>/data/data_in</string>
           </value>
         </nameValuePair>
       </configurationParameterSettings>
