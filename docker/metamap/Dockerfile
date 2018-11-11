@@ -3,6 +3,7 @@ FROM openjdk:8-jre
 RUN apt-get update
 RUN apt-get -qy install zip
 RUN apt-get -qy install jq 
+RUN apt-get -qy install netcat
 
 ADD public_mm /usr/share/public_mm
 ADD apache-uima /usr/share/uima
