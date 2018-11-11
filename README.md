@@ -26,7 +26,7 @@ We are currentluy testing native Linux OS access using a virtualized Kubernetes 
 
 If you are interested in testing this, please submit an issue. We can provide assistance in installation and configuration, as well as providing requisite `Docker` images needed to run this workflow.
 
-This project, including the Wiki is a work in progress...
+This project, including the [Wiki](https://github.com/nlpie/nlp-adapt-kube/wiki) is a work in progress...
 
 
 
