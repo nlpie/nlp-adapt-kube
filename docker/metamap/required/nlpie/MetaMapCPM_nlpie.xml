@@ -15,6 +15,13 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+  
+  
+  <!-- Optimize this ratio to prevent CPU thrashing beween processes: default was 3/1
+ 
+  <casProcessors casPoolSize="3" processingUnitThreadCount="1"> 
+	  
+	  -->
 
 <cpeDescription xmlns="http://uima.apache.org/resourceSpecifier">
   <collectionReader>
@@ -32,7 +39,7 @@
       </configurationParameterSettings>
     </collectionIterator>
   </collectionReader>
-  <casProcessors casPoolSize="3" processingUnitThreadCount="1">
+  <casProcessors casPoolSize="30" processingUnitThreadCount="8">
     <casProcessor deployment="integrated" name="MetaMap Pipeline">
       <descriptor>
         <import location="/usr/share/public_mm/nlpie/MetaMapApiAE.xml"/>
