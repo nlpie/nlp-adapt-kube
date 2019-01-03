@@ -1,6 +1,5 @@
 #!/bin/bash
 ##### Run CLAMP #####
-:w
 
 export DATA_DIRECTORY=/data
 export DATA_IN=$DATA_DIRECTORY/data_in
