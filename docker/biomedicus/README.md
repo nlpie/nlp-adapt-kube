@@ -10,7 +10,7 @@
 
 `cd docker/biomedicus`
 
-`docker build -t gms/biomedicus .` (NB: gms/biomedicus is the tag/name of the image)
+`docker build -t gms/biomedicus .` (NB: need `.`,  gms/biomedicus is the tag/name of the image)
 
 3. To SSH into container:
 
