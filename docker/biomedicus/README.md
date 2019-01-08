@@ -2,19 +2,23 @@
 
 ## Experiments in creating Dockerized containers utilizing:
 
-1. Build Docker image named gms/biomedicus to run BioMedICUS annotation engine:
+1. Drop biomedicus build file in `<path to nlp-adapt-kube>/docker/biomedicus`
 
-`docker build -t gms/biomedicus`
+2. Build Docker image named gms/biomedicus to run BioMedICUS annotation engine:
 
-NB: Be sure to modify `/path/to/bin/runCPE.sh`and `/path/to/CpeDescriptor.xml` in Dockerfile, accordingly to the type of BioMedICUS build you are using
+`cd <path to nlp-adapt-kube>`
 
-2. To SSH into container:
+`cd docker/biomedicus`
+
+`docker build -t gms/biomedicus .` (NB: need `.`,  gms/biomedicus is the tag/name of the image)
+
+3. To SSH into container:
 
 `docker run -i -t --entrypoint /bin/bash gms/biomedicus`
 
-3. Run BioMedICUS via container with shared host data:
+4. Run BioMedICUS via container with shared host data:
 
-`docker run -it gms/biomedicus /bin/bash`
+`docker run -it -v <host_dir_path>:/data gms/biomedicus /bin/bash`
 
 
 _Known Issues_
