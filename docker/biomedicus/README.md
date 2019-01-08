@@ -10,8 +10,6 @@
 `cd docker/biomedicus`
 `docker build -t gms/biomedicus .` (NB: gms/biomedicus is the tag/name of the image)
 
-NB: Be sure to modify `/path/to/bin/runCPE.sh`and `/path/to/CpeDescriptor.xml` in Dockerfile, accordingly to the type of BioMedICUS build you are using
-
 3. To SSH into container:
 
 `docker run -i -t --entrypoint /bin/bash gms/biomedicus`
