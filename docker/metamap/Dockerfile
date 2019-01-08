@@ -20,4 +20,4 @@ RUN  /usr/share/public_mm/bin/install.sh
 RUN chmod 755 /usr/share/public_mm/scripts/run_metamap.sh
 RUN chmod 755 /usr/share/public_mm/scripts/setup_uima.sh
 
-WORKDIR /data/data_in
+WORKDIR /data

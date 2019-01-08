@@ -10,5 +10,5 @@ ADD required/scripts /usr/share/clamp/scripts
 
 RUN chmod 755 /usr/share/clamp/scripts/run_clamp.sh
 
-WORKDIR /data/data_in
+WORKDIR /data
 
