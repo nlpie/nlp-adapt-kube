@@ -7,7 +7,9 @@
 2. Build Docker image named gms/biomedicus to run BioMedICUS annotation engine:
 
 `cd <path to nlp-adapt-kube>`
+
 `cd docker/biomedicus`
+
 `docker build -t gms/biomedicus .` (NB: gms/biomedicus is the tag/name of the image)
 
 3. To SSH into container:
