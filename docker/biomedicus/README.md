@@ -4,7 +4,7 @@
 
 1. Build Docker image named gms/biomedicus to run BioMedICUS annotation engine:
 
-`docker build -t gms/biomedicus`
+`docker build -t gms/biomedicus .`
 
 NB: Be sure to modify `/path/to/bin/runCPE.sh`and `/path/to/CpeDescriptor.xml` in Dockerfile, accordingly to the type of BioMedICUS build you are using
 
