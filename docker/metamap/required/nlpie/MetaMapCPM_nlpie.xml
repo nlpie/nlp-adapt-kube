@@ -46,7 +46,7 @@
       </descriptor>
       <deploymentParameters/>
       <errorHandling>
-        <errorRateThreshold action="terminate" value="0/1000"/>
+        <errorRateThreshold action="terminate" value="10/1000"/>
         <maxConsecutiveRestarts action="terminate" value="30"/>
         <timeout default="-1" max="100000"/>
       </errorHandling>
@@ -58,7 +58,7 @@
       </descriptor>
       <deploymentParameters/>
       <errorHandling>
-        <errorRateThreshold action="terminate" value="0/1000"/>
+        <errorRateThreshold action="terminate" value="10/1000"/>
         <maxConsecutiveRestarts action="terminate" value="30"/>
         <timeout default="-1" max="100000"/>
       </errorHandling>
