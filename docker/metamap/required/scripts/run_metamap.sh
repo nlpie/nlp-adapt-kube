@@ -7,7 +7,7 @@ export DATA_IN=$DATA_DIRECTORY/data_in
 export METAMAP_HOME=/usr/share/public_mm # /usr/share/public_mm
 
 export JAVA_TOOL_OPTIONS='-Xms2G -Xmx6G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
-export UIMA_JVM_OPTS="-Xms128M -Xmx5g" 
+export UIMA_JVM_OPTS='-Xms128M -Xmx5g' 
 
 # TODO: refactor out tagger and WSD as sidecard contaienrs
 # https://github.com/argoproj/argo/tree/master/examples#sidecars
@@ -18,7 +18,7 @@ wsdserverctl start
 # need to ensure tagger service has beee started
 REMOTEHOST=127.0.0.1
 REMOTEPORT=1795
-TIMEOUT=1
+TIMEOUT=5
 
 until 
 	nc -w $TIMEOUT -z $REMOTEHOST $REMOTEPORT 
@@ -28,7 +28,6 @@ done
 
 mmserver &
 	
-
 
 # TODO 
 #source ./setup_uima.sh
