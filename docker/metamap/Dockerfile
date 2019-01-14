@@ -4,6 +4,7 @@ RUN apt-get update
 RUN apt-get -qy install zip
 RUN apt-get -qy install jq 
 RUN apt-get -qy install netcat
+RUN apt-get -qy install vim
 
 ADD public_mm /usr/share/public_mm
 ADD apache-uima /usr/share/uima
