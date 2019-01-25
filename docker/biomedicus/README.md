@@ -18,7 +18,7 @@
 
 4. Run BioMedICUS via container with shared host data:
 
-`docker run -it -v <host_dir_path>:/data gms/biomedicus /bin/bash`
+`docker run -it -v host_dir_path:/data gms/biomedicus /bin/bash`
 
 
 _Known Issues_
