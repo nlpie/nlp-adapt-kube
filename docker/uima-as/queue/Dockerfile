@@ -13,7 +13,7 @@ RUN set -x && \
     chown -R activemq:activemq /opt/$ACTIVEMQ && \
     chown -h activemq:activemq $ACTIVEMQ_HOME
 
-USER activemq
+#USER activemq
 
 WORKDIR $ACTIVEMQ_HOME
 EXPOSE $ACTIVEMQ_TCP $ACTIVEMQ_AMQP $ACTIVEMQ_STOMP $ACTIVEMQ_MQTT $ACTIVEMQ_WS $ACTIVEMQ_UI
