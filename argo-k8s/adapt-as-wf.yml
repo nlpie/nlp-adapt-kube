@@ -71,7 +71,6 @@ spec:
                 - name: test-conf
                   mountPath: /opt/activemq/conf
                   readOnly: false  
-              
               volumes:
               - name: test-data
                 hostPath:
@@ -100,13 +99,13 @@ spec:
             protocol: TCP
             port: 61616
             targetPort: 61616
-            #nodePort: 31344
+            nodePort: 31344
           - name: test2
             protocol: TCP
             port: 8161
             targetPort: 8161
-            #nodePort: 31345
-            #type: NodePort
+            nodePort: 31345
+          type: NodePort
 
   - name: run-amq
     daemon: true
