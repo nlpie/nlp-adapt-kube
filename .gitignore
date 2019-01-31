@@ -17,6 +17,8 @@ docker/metamap/public_mm
 docker/metamap/apache-uima
 docker/nlp-tab/nlptab-webapp
 
+**/biomedicus-distribution-2.1.0
+
 config
 
 **/data

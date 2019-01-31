@@ -61,11 +61,15 @@ RUN set -o errexit -o nounset \
     && echo "Symlinking root .groovy to groovy .groovy" \
     && ln -s /home/groovy/.groovy /root/.groovy
 
+
 # Create Grapes volume
 USER groovy
 VOLUME "/home/groovy/.groovy/grapes"
+
+ADD required/lib /home/groovy/.groovy/lib
+ADD required/scripts /home/groovy/scripts
+
+# issue NLPADAPT_BROKER_URI="nio://localhost:61616" groovy CPC.groovy
+# can implement as classpath
 WORKDIR /home/groovy
 
-RUN set -o errexit -o nounset \
-    && echo "Testing Groovy installation" \
-    && groovy --version
