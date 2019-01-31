@@ -19,3 +19,5 @@ docker/nlp-tab/nlptab-webapp
 
 config
 
+**/data
+**/conf*
