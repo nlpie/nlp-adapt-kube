@@ -1,0 +1,1 @@
+After adding `lib` files to the Groovy path, script was originally invoked as `NLPADAPT_BROKER_URI="nio://localhost:61616" groovy client.groovy`, where `NLPADAPT_BROKER_URI` is the address of an ActiveMQ instance.

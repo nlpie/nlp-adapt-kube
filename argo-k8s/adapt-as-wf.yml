@@ -1,0 +1,140 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: run-adapt          #invoke the build template
+  volumes:
+  - name: test-data
+    hostPath: # change this accordingly to your host system
+      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+  - name: test-conf
+    hostPath: # change this accordingly to your host system
+      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+
+  templates:
+  - name: run-adapt
+    steps:
+    - - name: run-others
+        template: run-others
+
+  - name: run-others # run steps
+    steps:
+
+    - - name: amq-deployment
+        template: amq-server-d
+
+    - - name: amq-service
+        template: amq-server-s
+
+    - - name: amq
+        template: run-amq
+    
+    - - name: client
+        template: run-client
+        arguments:
+          parameters:
+          - name: cmd
+            value: nslookup amq.default #128.101.101.101
+
+  - name: amq-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: amq
+        spec:
+          selector:
+            matchLabels:
+              app: amq
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: amq
+                track: stable
+          
+            spec:
+              containers:
+              - image: gms/activemq
+                imagePullPolicy: Never
+                name: amq
+                ports:
+                - containerPort: 61616
+                - containerPort: 8161
+                volumeMounts:
+                - name: test-data
+                  mountPath: /opt/activemq/data
+                  readOnly: false  
+                - name: test-conf
+                  mountPath: /opt/activemq/conf
+                  readOnly: false  
+              volumes:
+              - name: test-data
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+              - name: test-conf
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+ 
+
+  - name: amq-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: amq
+          namespace: default
+          labels:
+            app: amq
+        spec:
+          selector:
+            app: amq
+          ports:
+          - name: test1
+            protocol: TCP
+            port: 61616
+            targetPort: 61616
+            nodePort: 31344
+          - name: test2
+            protocol: TCP
+            port: 8161
+            targetPort: 8161
+            nodePort: 31345
+          type: NodePort
+
+  - name: run-amq
+    daemon: true
+    container:
+      image: gms/activemq
+      imagePullPolicy: Never
+      readinessProbe:
+        exec:
+          command: 
+            - test
+            -  "curl -u admin:admin -d 'body=message' http://localhost:8161/api/message/TEST?type=queue"
+        initialDelaySeconds: 5
+        timeoutSeconds: 1
+      volumeMounts:
+      - name: test-data
+        mountPath:  /opt/activemq/data
+        readOnly: false
+      - name: test-conf
+        mountPath:  /opt/activemq/conf
+        readOnly: false
+
+    
+
+  - name: run-client # templates
+    inputs:
+      parameters:
+      - name: cmd
+    container:
+      image: infoblox/dnstools
+      imagePullPolicy: Never
+      command: ["/bin/sh", "-c"]
+      args: ["{{inputs.parameters.cmd}}"]
