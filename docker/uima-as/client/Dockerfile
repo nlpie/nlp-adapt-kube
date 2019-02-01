@@ -66,10 +66,13 @@ RUN set -o errexit -o nounset \
 USER groovy
 VOLUME "/home/groovy/.groovy/grapes"
 
-ADD required/lib /home/groovy/.groovy/lib
-ADD required/scripts /home/groovy/scripts
+ADD --chown=groovy:groovy required/lib /home/groovy/.groovy/lib
+ADD --chown=groovy:groovy required/scripts /home/groovy/scripts
+
+#RUN chown -R groovy:groovy /home/groovy/scripts
+#RUN chown -R groovy:groovy /home/groovy/.groovy
 
 # issue NLPADAPT_BROKER_URI="nio://localhost:61616" groovy CPC.groovy
 # can implement as classpath
-WORKDIR /home/groovy
+WORKDIR /home/groovy/data
 
