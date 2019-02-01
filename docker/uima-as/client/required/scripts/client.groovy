@@ -15,9 +15,14 @@ import org.apache.uima.collection.EntityProcessStatus
 
 import edu.umn.biomedicus.uima.adapter.UimaAdapters
 
+def env = System.getenv()
+def group = new DefaultPGroup(8)
+final def buffer = new SyncDataflowQueue()
+final def output = new DataflowQueue()
+final def b9 = new DataflowQueue()
 
-def fetchRecords(batch) {
-    def sql = Sql.newInstance("jdbc:sqlite:mimic-rtf.db")
+def fetchRecords(uri, batch) {
+    def sql = Sql.newInstance(uri)
     sql.withStatement { stmt ->
 	stmt.setFetchSize(25)
     }
@@ -27,25 +32,21 @@ def fetchRecords(batch) {
     return rows
 }
 
-def getUimaPipelineClient(uri, endpoint, callback) {
+def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
     if(callback != null) pipeline.addStatusCallbackListener(callback)
     def context = [(UimaAsynchronousEngine.ServerUri): uri,
 		   (UimaAsynchronousEngine.ENDPOINT): endpoint,
-		   (UimaAsynchronousEngine.CasPoolSize): 32]
+		   (UimaAsynchronousEngine.CasPoolSize): poolsize]
     pipeline.initialize(context)
     return pipeline
 }
 
-def env = System.getenv()
-def group = new DefaultPGroup(8)
-final def buffer = new SyncDataflowQueue()
-final def b9 = new DataflowQueue()
-
 final def biomedicusPipeline = getUimaPipelineClient(
     env["NLPADAPT_BROKER_URI"],
     "nlpadapt.biomedicus.outbound",
-    new BiomedicusCallbackListener()
+    new BiomedicusCallbackListener(output),
+    32
 )
 final def biomedicusArtificer = group.reactor {LinkedHashMap it ->
     def cas = biomedicusPipeline.getCAS()
@@ -60,7 +61,8 @@ final def biomedicusArtificer = group.reactor {LinkedHashMap it ->
 final def rtfPipeline = getUimaPipelineClient(
     env["NLPADAPT_BROKER_URI"],
     "nlpadapt.rtf.outbound",
-    new RtfCallbackListener(buffer)
+    new RtfCallbackListener(buffer),
+    8
 )
 
 final def rtfArtificer = group.reactor {
@@ -100,6 +102,12 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 }
 
 class BiomedicusCallbackListener extends UimaAsBaseCallbackListener {
+    DataflowQueue output
+
+    BiomedicusCallbackListener(DataflowQueue output){
+	this.output = output
+    }
+
     @Override
     void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
 
@@ -111,19 +119,29 @@ class BiomedicusCallbackListener extends UimaAsBaseCallbackListener {
             .next()
 	    .getStringValue(documentId)
 
-	println "processed ${filename}"
+	this.output << filename
     }
 }
 
-def splitter = group.splitter(buffer, [b9])
+def multiplier = group.splitter(buffer, [b9])
 
 b9.wheneverBound{
-    biomedicusPipeline.sendCAS(biomedicusArtificer.sendAndWait(it))
+    def bit = it
+    group.actor {
+	biomedicusArtificer.send bit
+	react {
+	    biomedicusPipeline.sendCAS(it)
+	}
+    }
 }
 
-for(i in fetchRecords([0,10000])){
+output.wheneverBound{
+    println "processed ${it}"
+}
+
+for(i in fetchRecords(env["NLPADAPT_DATASOURCE_URI"], [0,10000])){
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(i))
 }
 
-splitter.terminate()
+multiplier.terminate()
 group.shutdown()
