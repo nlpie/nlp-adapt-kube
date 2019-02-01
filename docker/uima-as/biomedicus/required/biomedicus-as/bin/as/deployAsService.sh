@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 DIR="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
 
 "$DIR/../runClass.sh" org.apache.uima.adapter.jms.service.UIMA_Service \

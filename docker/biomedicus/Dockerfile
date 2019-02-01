@@ -1,8 +1,7 @@
 FROM openjdk:8-jre
 
 RUN apt-get update
-RUN apt-get -qy install zip
-RUN apt-get -qy install jq 
+RUN apt-get -qy install vim
 
 ADD biomedicus-distribution-2.0.1-release /usr/share/biomedicus
 ADD required/nlpie /usr/share/biomedicus/nlpie
