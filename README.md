@@ -16,7 +16,7 @@ Usability: We simplify the process of deploying a kubernetes cluster by utilizin
 
 ### Status of Project
 
-We utilize a [`minikube`](https://kubernetes.io/docs/setup/minikube/) for testing as a singlge node Kubernetes cluster. We also successfully deployed a Kubernetes cluster across multiple nodes with a single master node using [`kubeadm`](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/).
+We utilize [`minikube`](https://kubernetes.io/docs/setup/minikube/) for testing as a single node Kubernetes cluster. We also successfully deployed a Kubernetes cluster across multiple nodes with a single master node using [`kubeadm`](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/).
 
 All local devlopment can be done using `minikube` and then pushed to a production cluster. Our production cluster uses barebones native Linux OS access using `calico` as a virtualized overlay network to manage internal requests within cluster.
 
