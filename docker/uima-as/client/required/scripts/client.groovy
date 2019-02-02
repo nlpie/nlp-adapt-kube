@@ -143,5 +143,5 @@ for(i in fetchRecords(env["NLPADAPT_DATASOURCE_URI"], [0,10000])){
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(i))
 }
 
-multiplier.terminate()
-group.shutdown()
+// multiplier.terminate()
+// group.shutdown()
