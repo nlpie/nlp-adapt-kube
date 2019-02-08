@@ -3,7 +3,7 @@ FROM openjdk:8-jdk
 CMD ["groovysh"]
 
 ENV GROOVY_HOME /opt/groovy
-ENV GROOVY_VERSION 2.5.5
+ENV GROOVY_VERSION 2.5.6
 
 RUN set -o errexit -o nounset \
     && echo "Downloading Groovy" \
@@ -60,7 +60,6 @@ RUN set -o errexit -o nounset \
     \
     && echo "Symlinking root .groovy to groovy .groovy" \
     && ln -s /home/groovy/.groovy /root/.groovy
-
 
 # Create Grapes volume
 USER groovy
