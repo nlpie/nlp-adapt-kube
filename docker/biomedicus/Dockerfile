@@ -1,9 +1,9 @@
 FROM openjdk:8-jre
 
 RUN apt-get update
-RUN apt-get -qy install vim
+RUN apt-get -qy install zip
 
-ADD biomedicus-distribution-2.0.1-release /usr/share/biomedicus
+ADD biomedicus-distribution-2.1.0-release /usr/share/biomedicus
 ADD required/nlpie /usr/share/biomedicus/nlpie
 ADD required/scripts /usr/share/biomedicus/scripts
 
