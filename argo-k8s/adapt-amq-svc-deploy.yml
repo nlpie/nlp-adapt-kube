@@ -1,42 +1,32 @@
-ApiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Workflow                  #new type of k8s spec
 metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
-  entrypoint: run-adapt          #invoke the build template
+  entrypoint: nlp-adapt          #invoke the build template
   volumes:
-  - name: test-data
-    hostPath: # change this accordingly to your host system
-      path: /Users/gms/development/nlp/nlpie/data/adapt-kube/amq/data  
-  - name: test-conf
-    hostPath: # change this accordingly to your host system
-      path: /Users/gms/development/nlp/nlpie/data/adapt-kube/amq/conf  
-
+  - name: test-volume
+    hostPath:
+      path: /Users/gregsilverman/workspace/test # must match host directory in minikube; cannot be symlinked
+      # path: /Volumes/GrenziData/development/data
+  
   templates:
-  - name: run-adapt
-    steps:
-    - - name: run-others
-        template: run-others
 
-  - name: run-others # run steps
+  - name: nlp-adapt
     steps:
-
     - - name: amq-deployment
         template: amq-server-d
-
     - - name: amq-service
         template: amq-server-s
-
-
-   - name: amq-server-d
-     resource:
+  
+  - name: amq-server-d
+    resource:
       action: create
       manifest: |
         apiVersion: apps/v1
         kind: Deployment
         metadata:
           name: amq
-          #namespace: adapt
         spec:
           selector:
             matchLabels:
@@ -49,8 +39,10 @@ spec:
                 track: stable
           
             spec:
+              nodeSelector:
+                dns: dns1
               containers:
-              - image: gms/activemq
+              - image: ahc-nlpie-docker.artifactory.umn.edu/activemq
                 imagePullPolicy: Never
                 name: amq
                 ports:
@@ -63,15 +55,17 @@ spec:
                 - name: test-conf
                   mountPath: /opt/activemq/conf
                   readOnly: false  
+              
               volumes:
               - name: test-data
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+                  path:  /home/gms/projects/k8s/amq/data
               - name: test-conf
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf 
+                  path:  /home/gms/projects/k8s/amq/conf
 
-   - name: amq-server-s
+
+  - name: amq-server-s
     resource:
       action: create
       manifest: |
@@ -79,25 +73,24 @@ spec:
         kind: Service
         metadata:
           name: amq
-          #namespace: adapt
+          namespace: default
           labels:
             app: amq
+
         spec:
           selector:
             app: amq
           ports:
-          - name: test1
-            protocol: TCP
-            port: 61616
-            targetPort: 61616
-            nodePort: 31344
-          - name: test2
+          - name: test1 
             protocol: TCP
             port: 8161
             targetPort: 8161
             nodePort: 31345
+          - name: test2 
+            protocol: TCP
+            port: 61616
+            targetPort: 61616
+            nodePort: 31344
+
           type: NodePort
-
-
-
-
+       
