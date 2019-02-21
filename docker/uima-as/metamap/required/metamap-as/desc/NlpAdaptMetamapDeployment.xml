@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016 Regents of the University of Minnesota - All Rights Reserved
+  ~ Unauthorized Copying of this file, via any medium is strictly prohibited
+  ~ Proprietary and Confidential
+  -->
+
+<analysisEngineDeploymentDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <name>NlpAdapt Metamap Pipeline Engine</name>
+    <description>Outbound processing for new information</description>
+    <version>${project.version}</version>
+    <vendor>${project.organization.name}</vendor>
+
+    <deployment protocol="jms" provider="activemq">
+        <casPool numberOfCASes="32"/>
+        <service>
+            <inputQueue endpoint="nlpadapt.metamap.outbound" brokerURL="nio://localhost:61616" prefetch="32"/>
+            <topDescriptor>
+                <import location="ae/NlpAdaptMetamapPipeline.xml"/>
+            </topDescriptor>
+            <analysisEngine async="false">
+                <scaleout numberOfInstances="32"/>
+            </analysisEngine>
+        </service>
+    </deployment>
+</analysisEngineDeploymentDescription>
