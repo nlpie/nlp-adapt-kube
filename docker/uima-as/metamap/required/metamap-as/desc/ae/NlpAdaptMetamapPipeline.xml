@@ -15,7 +15,7 @@
         </delegateAnalysisEngine>
     </delegateAnalysisEngineSpecifiers>
     <analysisEngineMetaData>
-        <name>Metamap Pipeline</name>
+        <name>Metamap Outbound Pipeline</name>
         <version>${project.version}</version>
         <vendor>${project.organization.name}</vendor>
         <flowConstraints>

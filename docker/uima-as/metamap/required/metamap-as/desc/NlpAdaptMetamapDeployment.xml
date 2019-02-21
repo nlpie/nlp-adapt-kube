@@ -6,8 +6,8 @@
   -->
 
 <analysisEngineDeploymentDescription xmlns="http://uima.apache.org/resourceSpecifier">
-    <name>NlpAdapt Metamap Pipeline Engine</name>
-    <description>Outbound processing for new information</description>
+    <name>NlpAdapt MetaMap Pipeline Engine</name>
+    <description>MetaMap Pipeline Deployment</description>
     <version>${project.version}</version>
     <vendor>${project.organization.name}</vendor>
 

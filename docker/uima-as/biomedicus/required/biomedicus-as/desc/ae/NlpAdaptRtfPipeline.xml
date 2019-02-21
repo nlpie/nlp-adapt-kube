@@ -20,7 +20,7 @@
         <!-- </delegateAnalysisEngine> -->
     </delegateAnalysisEngineSpecifiers>
     <analysisEngineMetaData>
-        <name>AHRQ Outbound Pipeline</name>
+        <name>RTF Outbound Pipeline</name>
         <version>${project.version}</version>
         <vendor>${project.organization.name}</vendor>
         <flowConstraints>
