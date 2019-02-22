@@ -6,8 +6,8 @@
   -->
 
 <analysisEngineDeploymentDescription xmlns="http://uima.apache.org/resourceSpecifier">
-    <name>New Info Outbound Pipeline Engine</name>
-    <description>Outbound processing for new information</description>
+    <name>NlpAdapt RTF Pipeline Engine</name>
+    <description>Deployment using BioMedICUS to convert RTF to plaintext</description>
     <version>${project.version}</version>
     <vendor>${project.organization.name}</vendor>
 
