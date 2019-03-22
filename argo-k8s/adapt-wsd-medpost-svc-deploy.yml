@@ -1,0 +1,122 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt          #invoke the build template
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    - - name: medpost-deployment
+        template: medpost-server-d
+    - - name: medpost-service
+        template: medpost-server-s
+    - - name: wsd-deployment
+        template: wsd-server-d
+    - - name: wsd-service
+        template: wsd-server-s
+  
+  - name: medpost-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: medpost
+        spec:
+          selector:
+            matchLabels:
+              app: medpost
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: medpost
+                track: stable
+          
+            spec:
+              nodeSelector:
+                dns: dns1
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/medpost-skr
+                imagePullPolicy: Never
+                name: medpost
+                ports:
+                - containerPort: 1795
+
+  - name: medpost-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: medpost
+          namespace: default
+          labels:
+            app: medpost
+
+        spec:
+          selector:
+            app: medpost
+          ports:
+          - name: test1 
+            protocol: TCP
+            port: 1795
+            targetPort: 1795
+
+       
+  - name: wsd-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: wsd
+        spec:
+          selector:
+            matchLabels:
+              app: wsd
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: wsd
+                track: stable
+          
+            spec:
+              nodeSelector:
+                dns: dns1
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/wsd_server
+                imagePullPolicy: Never
+                name: wsd
+                ports:
+                - containerPort: 5554
+
+  - name: medpost-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: wsd
+          namespace: default
+          labels:
+            app: wsd
+
+        spec:
+          selector:
+            app: wsd
+          ports:
+          - name: test1 
+            protocol: TCP
+            port: 5554
+            targetPort: 5554
+
+       

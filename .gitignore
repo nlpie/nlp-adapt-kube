@@ -13,7 +13,8 @@ docker/clamp/clamp
 docker/clamp/clamp.tar.gz
 docker/clamp/required/license
 docker/ctakes/ctakes-distribution
-docker/metamap/public_mm
+*public_mm
+*public_mm_2016
 docker/metamap/apache-uima
 docker/nlp-tab/nlptab-webapp
 

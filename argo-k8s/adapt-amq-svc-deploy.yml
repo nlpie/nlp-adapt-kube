@@ -12,7 +12,7 @@ spec:
   
   templates:
 
-  - name: nlp-adapt
+  - name: nlp-adapt-amq-service
     steps:
     - - name: amq-deployment
         template: amq-server-d
