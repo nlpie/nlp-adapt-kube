@@ -3,7 +3,7 @@ kind: Workflow                  #new type of k8s spec
 metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
-  entrypoint: nlp-adapt          #invoke the build template
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
   
   templates:
 
@@ -13,10 +13,10 @@ spec:
         template: medpost-server-d
     - - name: medpost-service
         template: medpost-server-s
-    - - name: wsd-deployment
-        template: wsd-server-d
-    - - name: wsd-service
-        template: wsd-server-s
+        #- - name: wsd-deployment
+        #template: wsd-server-d
+        #- - name: wsd-service
+        #template: wsd-server-s
   
   - name: medpost-server-d
     resource:
@@ -38,8 +38,8 @@ spec:
                 track: stable
           
             spec:
-              nodeSelector:
-                dns: dns1
+                #nodeSelector:
+                #dns: dns1
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/medpost-skr
                 imagePullPolicy: Never
@@ -63,9 +63,7 @@ spec:
           selector:
             app: medpost
           ports:
-          - name: test1 
-            protocol: TCP
-            port: 1795
+          - port: 1795
             targetPort: 1795
 
        
@@ -89,8 +87,8 @@ spec:
                 track: stable
           
             spec:
-              nodeSelector:
-                dns: dns1
+                #nodeSelector:
+                #dns: dns1
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/wsd_server
                 imagePullPolicy: Never
@@ -98,7 +96,7 @@ spec:
                 ports:
                 - containerPort: 5554
 
-  - name: medpost-server-s
+  - name: wsd-server-s
     resource:
       action: create
       manifest: |
@@ -114,9 +112,7 @@ spec:
           selector:
             app: wsd
           ports:
-          - name: test1 
-            protocol: TCP
-            port: 5554
+          - port: 5554
             targetPort: 5554
 
        

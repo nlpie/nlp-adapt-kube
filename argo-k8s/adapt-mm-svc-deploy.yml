@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    - - name: mm-deployment
+        template: mm-server-d
+    - - name: mm-service
+        template: mm-server-s
+  
+  - name: mm-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mm
+        spec:
+          selector:
+            matchLabels:
+              app: mm
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: mm
+                track: stable
+          
+            spec:
+                #nodeSelector:
+                #dns: dns1
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/mm
+                imagePullPolicy: Never
+                name: mm
+                ports:
+                - containerPort: 8066
+                env:
+                - name: TAGGER_SERVER_HOSTS 
+                  value: medpost.default
+                - name: WSD_SERVER_HOSTS
+                  value: wsd.default
+
+  - name: mm-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mm
+          namespace: default
+          labels:
+            app: mm
+
+        spec:
+          selector:
+            app: mm
+          ports:
+          - port: 8066
+            targetPort: 8066
+
+       

@@ -15,6 +15,7 @@ docker/clamp/required/license
 docker/ctakes/ctakes-distribution
 *public_mm
 *public_mm_2016
+*apache-uima
 docker/metamap/apache-uima
 docker/nlp-tab/nlptab-webapp
 

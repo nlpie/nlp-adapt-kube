@@ -3,7 +3,7 @@ kind: Workflow                  #new type of k8s spec
 metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
-  entrypoint: nlp-adapt          #invoke the build template
+  entrypoint: nlp-adapt-amq-service          #invoke the build template
   volumes:
   - name: test-volume
     hostPath:
@@ -39,10 +39,10 @@ spec:
                 track: stable
           
             spec:
-              nodeSelector:
-                dns: dns1
+                #nodeSelector:
+                #dns: dns1
               containers:
-              - image: ahc-nlpie-docker.artifactory.umn.edu/activemq
+              - image: gms/activemq
                 imagePullPolicy: Never
                 name: amq
                 ports:
@@ -59,10 +59,10 @@ spec:
               volumes:
               - name: test-data
                 hostPath:
-                  path:  /home/gms/projects/k8s/amq/data
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data #/home/gms/projects/k8s/amq/data
               - name: test-conf
                 hostPath:
-                  path:  /home/gms/projects/k8s/amq/conf
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf #/home/gms/projects/k8s/amq/conf
 
 
   - name: amq-server-s
