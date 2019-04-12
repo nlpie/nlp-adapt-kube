@@ -26,6 +26,7 @@ spec:
     - - name: mmserver-service
         template: mmserver-server-s
 
+
   # medpost deployment/service
   - name: medpost-server-d
     resource:
@@ -75,8 +76,8 @@ spec:
           - port: 1795
             targetPort: 1795
 
-  # wsd deployment/service
-       
+
+  # wsd deployment/service     
   - name: wsd-server-d
     resource:
       action: create
@@ -125,14 +126,14 @@ spec:
           - port: 5554
             targetPort: 5554
 
-  # mmannotator damon and service
 
+  # mmannotator damon and service
   - name:  mmannotator-daemon
     daemon: true
     container:
       image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
       imagePullPolicy: Never
-      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+      command: ["/usr/share/public_mm/bin/deployMetamapPipeline.sh"] 
     metadata:
       labels:
         app: mmannotator
@@ -155,7 +156,22 @@ spec:
             app: mmannotator
 
 
-              metadata:
+  # mmserver deployment and service
+  - name: mmserver-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mmserver
+        spec:
+          selector:
+            matchLabels:
+              app: mmserver
+              track: stable
+          template:
+            metadata:
               labels:
                 app: mmserver
                 track: stable
@@ -177,7 +193,6 @@ spec:
                 - name: ACCEPTED_HOSTS
                   value: mmannotator.default
 
-  # mmserver deployment and service
   - name: mmserver-server-s
     resource:
       action: create
