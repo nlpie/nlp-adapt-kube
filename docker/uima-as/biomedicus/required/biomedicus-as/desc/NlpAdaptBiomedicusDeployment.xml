@@ -14,7 +14,7 @@
     <deployment protocol="jms" provider="activemq">
         <casPool numberOfCASes="200"/>
         <service>
-            <inputQueue endpoint="nlpadapt.biomedicus.outbound" brokerURL="nio://localhost:61616" prefetch="32"/>
+            <inputQueue endpoint="nlpadapt.biomedicus.outbound" brokerURL="nio://amq.default:61616" prefetch="32"/>
             <topDescriptor>
                 <import location="ae/NlpAdaptBiomedicusPipeline.xml"/>
             </topDescriptor>
