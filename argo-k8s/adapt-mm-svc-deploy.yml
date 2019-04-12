@@ -9,12 +9,12 @@ spec:
 
   - name: nlp-adapt-metamap-services
     steps:
-    - - name: mm-deployment
-        template: mm-server-d
-    - - name: mm-service
-        template: mm-server-s
+    - - name: mmserver-deployment
+        template: mmserver-server-d
+    - - name: mmserver-service
+        template: mmserver-server-s
   
-  - name: mm-server-d
+  - name: mmserver-server-d
     resource:
       action: create
       manifest: |
@@ -48,7 +48,7 @@ spec:
                 - name: WSD_SERVER_HOSTS
                   value: wsd.default
 
-  - name: mm-server-s
+  - name: mmserver-server-s
     resource:
       action: create
       manifest: |

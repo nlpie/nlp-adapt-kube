@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    - - name: mmserver-daemon
+        template: mmserver-daemon
+    - - name: mmannotator-service
+        template: mmannotator-server-s
+
+  - name:  mmserver-daemon
+    daemon: true
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
+      imagePullPolicy: Never
+      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+    metadata:
+      labels:
+        app: mmannotator
+
+  
+  - name: mmannotator-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mmserver
+          namespace: default
+          labels:
+            app: mmannotator
+
+        spec:
+          selector:
+            app: mmannotator
+
+
+       
