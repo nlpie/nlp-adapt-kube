@@ -9,37 +9,42 @@ spec:
 
   - name: nlp-adapt-metamap-services
     steps:
-    - - name: mmserver-daemon
-        template: mmserver-daemon
+    - - name: mmannotator-daemon
+        template: mmannotator-daemon
     - - name: mmannotator-service
-        template: mmannotator-server-s
+        template: mmannotator-s
 
-  - name:  mmserver-daemon
+  - name:  mmannotator-daemon
     daemon: true
     container:
       image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
       imagePullPolicy: Never
-      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+      stdin: true 
+      tty: true 
     metadata:
       labels:
         app: mmannotator
 
   
-  - name: mmannotator-server-s
+  - name: mmannotator-s
     resource:
       action: create
       manifest: |
         apiVersion: v1
         kind: Service
         metadata:
-          name: mmserver
+          name: mmannotator
           namespace: default
           labels:
             app: mmannotator
-
         spec:
           selector:
             app: mmannotator
+          ports:
+          - port: 31166
+            targetPort: 31166
+
 
 
        

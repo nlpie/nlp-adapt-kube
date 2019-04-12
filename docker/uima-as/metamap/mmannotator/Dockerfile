@@ -10,6 +10,7 @@ ENV PATH=/usr/share/public_mm/bin:$PATH
 
 WORKDIR  /usr/share/public_mm
 
+RUN chmod 755 /usr/share/public_mm/src/uima/bin
 
 # --- BUILD ---
 RUN  /usr/share/public_mm/bin/install.sh

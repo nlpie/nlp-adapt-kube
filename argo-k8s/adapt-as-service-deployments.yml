@@ -9,14 +9,27 @@ spec:
 
   - name: nlp-adapt-metamap-services
     steps:
-        #- - name: medpost-deployment
-        #template: medpost-d
-        #- - name: medpost-service
-        #template: medpost-s
-        #- - name: wsd-deployment
-        #template: wsd-d
-        #- - name: wsd-service
-        #template: wsd-s
+    # Active MQ
+    - - name: amq-deployment
+        template: amq-d
+    - - name: amq-service
+        template: amq-s
+   
+    # RTF writer 
+    - - name: rtf-deployment
+        template: rtf-d
+    - - name: rtf-service
+        template: rtf-s
+
+    # metamap
+    - - name: medpost-deployment
+        template: medpost-d
+    - - name: medpost-service
+        template: medpost-s
+    - - name: wsd-deployment
+        template: wsd-d
+    - - name: wsd-service
+        template: wsd-s
     - - name: mmannotator-deployment
         template: mmannotator-d
     - - name: mmannotator-service
@@ -25,6 +38,122 @@ spec:
         template: mmserver-d
     - - name: mmserver-service
         template: mmserver-s
+
+
+  # amq deployment/service
+  - name: amq-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: amq
+          namespace: adapt
+        spec:
+          selector:
+            matchLabels:
+              app: amq
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: amq
+                track: stable
+            spec:
+              containers:
+              - image: gms/activemq
+                imagePullPolicy: Never
+                name: amq
+                ports:
+                - containerPort: 61616
+                - containerPort: 8161
+                volumeMounts:
+                - name: test-data
+                  mountPath: /opt/activemq/data
+                  readOnly: false  
+                - name: test-conf
+                  mountPath: /opt/activemq/conf
+                  readOnly: false  
+              volumes:
+              - name: test-data
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+              - name: test-conf
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+   
+
+  - name: amq-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: amq
+          namespace: adapt
+          labels:
+            app: amq
+        spec:
+          selector:
+            app: amq
+          ports:
+          - name: test1
+            protocol: TCP
+            port: 61616
+            targetPort: 61616
+            nodePort: 31344
+          - name: test2
+            protocol: TCP
+            port: 8161
+            targetPort: 8161
+            nodePort: 31345
+          type: NodePort
+       
+
+  # rtf deployment/service
+  - name: rtf-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: rtf
+        spec:
+          selector:
+            matchLabels:
+              app: rtf
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: rtf
+                track: stable
+            spec:
+                #nodeSelector:
+                #dns: dns1
+              containers:
+              - image: gms/rtf
+                imagePullPolicy: Never
+                name: rtf
+                command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+
+  - name: rtf-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: rtf
+          namespace: default
+          labels:
+            app: rtf
+        spec:
+          selector:
+            app: rtf
 
 
   # medpost deployment/service
@@ -46,7 +175,6 @@ spec:
               labels:
                 app: medpost
                 track: stable
-          
             spec:
                 #nodeSelector:
                 #dns: dns1
@@ -56,6 +184,7 @@ spec:
                 name: medpost
                 ports:
                 - containerPort: 1795
+
 
   - name: medpost-s
     resource:
@@ -68,7 +197,6 @@ spec:
           namespace: default
           labels:
             app: medpost
-
         spec:
           selector:
             app: medpost
@@ -96,10 +224,9 @@ spec:
               labels:
                 app: wsd
                 track: stable
-          
             spec:
-                #nodeSelector:
-                #dns: dns1
+                nodeSelector:
+                dns: dns1
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/wsd_server
                 imagePullPolicy: Never
@@ -118,7 +245,6 @@ spec:
           namespace: default
           labels:
             app: wsd
-
         spec:
           selector:
             app: wsd
@@ -139,14 +265,13 @@ spec:
         spec:
           selector:
             matchLabels:
-              app: wsd
+              app: mmannotator 
               track: stable
           template:
             metadata:
               labels:
                 app: mmannotator
                 track: stable
-          
             spec:
                 #nodeSelector:
                 #dns: dns1
@@ -154,18 +279,7 @@ spec:
               - image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
                 imagePullPolicy: Never
                 name: mmannotator
-                command: ["/usr/share/public_mm/bin/deployMetamapPipeline.sh"] 
-
-
-                #- name:  mmannotator-daemon
-                #daemon: true
-                #container:
-                #image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
-                #imagePullPolicy: Never
-                #command: ["/usr/share/public_mm/bin/deployMetamapPipeline.sh"] 
-                #metadata:
-                #labels:
-                #app: mmannotator
+                command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
 
   
   - name: mmannotator-s
@@ -175,11 +289,10 @@ spec:
         apiVersion: v1
         kind: Service
         metadata:
-          name: mmserver
+          name: mmannotator
           namespace: default
           labels:
             app: mmannotator
-
         spec:
           selector:
             app: mmannotator
@@ -204,10 +317,9 @@ spec:
               labels:
                 app: mmserver
                 track: stable
-          
             spec:
-                #nodeSelector:
-                #dns: dns1
+                nodeSelector:
+                dns: dns1
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/mmserver
                 imagePullPolicy: Never
@@ -222,6 +334,7 @@ spec:
                 - name: ACCEPTED_HOSTS
                   value: mmannotator.default
 
+
   - name: mmserver-s
     resource:
       action: create
@@ -233,7 +346,6 @@ spec:
           namespace: default
           labels:
             app: mmserver
-
         spec:
           selector:
             app: mmserver

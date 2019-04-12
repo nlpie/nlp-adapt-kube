@@ -13,10 +13,10 @@ spec:
         template: medpost-server-d
     - - name: medpost-service
         template: medpost-server-s
-        #- - name: wsd-deployment
-        #template: wsd-server-d
-        #- - name: wsd-service
-        #template: wsd-server-s
+    - - name: wsd-deployment
+        template: wsd-server-d
+    - - name: wsd-service
+        template: wsd-server-s
   
   - name: medpost-server-d
     resource:
