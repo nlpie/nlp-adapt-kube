@@ -21,25 +21,25 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: mm
+          name: mmserver
         spec:
           selector:
             matchLabels:
-              app: mm
+              app: mmserver
               track: stable
           template:
             metadata:
               labels:
-                app: mm
+                app: mmserver
                 track: stable
           
             spec:
                 #nodeSelector:
                 #dns: dns1
               containers:
-              - image: ahc-nlpie-docker.artifactory.umn.edu/mm
+              - image: ahc-nlpie-docker.artifactory.umn.edu/mmserver
                 imagePullPolicy: Never
-                name: mm
+                name: mmserver
                 ports:
                 - containerPort: 8066
                 env:
@@ -55,14 +55,14 @@ spec:
         apiVersion: v1
         kind: Service
         metadata:
-          name: mm
+          name: mmserver
           namespace: default
           labels:
-            app: mm
+            app: mmserver
 
         spec:
           selector:
-            app: mm
+            app: mmserver
           ports:
           - port: 8066
             targetPort: 8066

@@ -4,14 +4,8 @@ metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
   entrypoint: nlp-adapt-amq-service          #invoke the build template
-  volumes:
-  - name: test-volume
-    hostPath:
-      path: /Users/gregsilverman/workspace/test # must match host directory in minikube; cannot be symlinked
-      # path: /Volumes/GrenziData/development/data
   
   templates:
-
   - name: nlp-adapt-amq-service
     steps:
     - - name: amq-deployment
@@ -59,10 +53,10 @@ spec:
               volumes:
               - name: test-data
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data #/home/gms/projects/k8s/amq/data
+                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt/docker/uima-as/queue/amq/data #/home/gms/projects/k8s/amq/data
               - name: test-conf
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf #/home/gms/projects/k8s/amq/conf
+                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt/docker/uima-as/queue/amq/conf #/home/gms/projects/k8s/amq/conf
 
 
   - name: amq-server-s
