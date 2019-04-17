@@ -41,7 +41,7 @@ spec:
                 #nodeSelector:
                 #dns: dns1
               containers:
-              - image: ahc-nlpie-docker.artifactory.umn.edu/medpost-skr
+              - image: ahc-nlpie-docker.artifactory.umn.edu/medpost
                 imagePullPolicy: Never
                 name: medpost
                 ports:
@@ -90,7 +90,7 @@ spec:
                 #nodeSelector:
                 #dns: dns1
               containers:
-              - image: ahc-nlpie-docker.artifactory.umn.edu/wsd_server
+              - image: ahc-nlpie-docker.artifactory.umn.edu/wsd
                 imagePullPolicy: Never
                 name: wsd
                 ports:

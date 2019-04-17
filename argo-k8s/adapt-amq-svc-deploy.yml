@@ -36,7 +36,7 @@ spec:
                 #nodeSelector:
                 #dns: dns1
               containers:
-              - image: gms/activemq
+              - image: ahc-nlpie-docker.artifactory.umn.edu/amq
                 imagePullPolicy: Never
                 name: amq
                 ports:
@@ -53,10 +53,10 @@ spec:
               volumes:
               - name: test-data
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt/docker/uima-as/queue/amq/data #/home/gms/projects/k8s/amq/data
+                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt-kube/docker/uima-as/queue/testing//data #/home/gms/projects/k8s/amq/data
               - name: test-conf
                 hostPath:
-                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt/docker/uima-as/queue/amq/conf #/home/gms/projects/k8s/amq/conf
+                  path:  /Users/gms/development/nlp/nlpie/nlp-adapt-kube/docker/uima-as/queue/testing/conf #/home/gms/projects/k8s/amq/conf
 
 
   - name: amq-server-s
