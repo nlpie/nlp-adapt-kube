@@ -46,6 +46,7 @@ fi
 export MMSERVER_PORT
 
 # for mmserver
+# uses k8s service environment variable based on service name:
 if [ -z $ACCEPTED_HOSTS ] ; then
     ACCEPTED_HOSTS="['$MMANNOTATOR_SERVICE_HOST']"
 fi
