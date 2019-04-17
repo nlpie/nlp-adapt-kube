@@ -113,14 +113,14 @@ spec:
   - name: run-rtf
     daemon: true
     container:
-      image: gms/biomedicus
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
       imagePullPolicy: Never
       command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
     
   - name: run-biomedicus
     daemon: true
     container:
-      image: gms/biomedicus
+      image:  ahc-nlpie-docker.artifactory.umn.edu/biomedicus
       imagePullPolicy: Never
       tty: true
       stdin: true
@@ -128,7 +128,7 @@ spec:
 
   - name: run-client
     container:
-      image: gms/cpc
+      image: ahc-nlpie-docker.artifactory.umn.edu/cpc
       imagePullPolicy: Never
       env:
         - name: NLPADAPT_BROKER_URI

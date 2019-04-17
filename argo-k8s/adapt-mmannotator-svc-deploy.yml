@@ -14,9 +14,14 @@ spec:
     - - name: mmannotator-service
         template: mmannotator-s
     - - name: mmserver-deployment
-        template: mmserver-server-d
+        template: mmserver-d
     - - name: mmserver-service
-        template: mmserver-server-s
+        template: mmserver-s
+    - - name: rtf-deployment
+        template: rtf-d
+    - - name: rtf-service
+        template: rtf-s
+
 
 #  - name:  mmannotator-daemon
 #    daemon: true
@@ -79,7 +84,7 @@ spec:
             targetPort: 31166
 
        
-  - name: mmserver-server-d
+  - name: mmserver-d
     resource:
       action: create
       manifest: |
@@ -110,7 +115,7 @@ spec:
                 - name: WSD_SERVER_HOSTS
                   value: wsd.default
 
-  - name: mmserver-server-s
+  - name: mmserver-s
     resource:
       action: create
       manifest: |
@@ -127,4 +132,49 @@ spec:
           ports:
           - port: 8066
             targetPort: 8066
+
+  - name: rtf-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: rtf
+        spec:
+          selector:
+            matchLabels:
+              app: rtf
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: rtf
+                track: stable
+            spec:
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+                imagePullPolicy: Never
+                command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+                name: rtf
+                ports:
+                - containerPort: 35555
+
+  - name: rtf-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: rtf
+          namespace: default
+          labels:
+            app: rtf
+        spec:
+          selector:
+            app: rtf
+          ports:
+          - port: 35555
+            targetPort: 35555
 
