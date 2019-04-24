@@ -33,11 +33,12 @@ spec:
     - - name: biomedicus-rtf
         template: run-rtf
     
-    - - name: biomedicus
-        template: run-biomedicus
+        #- - name: biomedicus
+        #template: run-biomedicus
     
-    - - name: client
-        template: run-client
+    
+        #- - name: client
+        #template: run-client
 
         #  - name: amq-server-d
         #    resource:

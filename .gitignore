@@ -8,9 +8,8 @@ docker/biomedicus/biomedicus-distribution-2.0.1-release
 docker/biomedicus/biomedicus.tar.gz
 docker/elastic_search/elasticsearch-2.1.0
 docker/amicus/amicus-distribution
-docker/clamp/ClampCmd_1.4.0
-docker/clamp/clamp
-docker/clamp/clamp.tar.gz
+docker/clamp/clamp_build
+docker/clamp/clamp-old
 docker/clamp/required/license
 docker/ctakes/ctakes-distribution
 *public_mm

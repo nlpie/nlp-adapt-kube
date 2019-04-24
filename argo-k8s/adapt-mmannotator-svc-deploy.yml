@@ -4,11 +4,25 @@ metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
   entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  volumes:
+      #  - name: test-data
+      #    hostPath: # change this accordingly to your host system
+      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+      #  - name: test-conf
+      #    hostPath: # change this accordingly to your host system
+      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+  - name: test-rtf
+    hostPath: # change this accordingly to your host system
+      path: /Users/gms/development/nlp/nlpie/nlp-adapt-kube/docker/uima-as/client/data 
+
   
   templates:
 
   - name: nlp-adapt-metamap-services
     steps:
+    - - name: biomedicus-rtf
+        template: run-rtf
+
     - - name: mmannotator-deployment
         template: mmannotator-d
     - - name: mmannotator-service
@@ -17,10 +31,16 @@ spec:
         template: mmserver-d
     - - name: mmserver-service
         template: mmserver-s
-    - - name: rtf-deployment
-        template: rtf-d
-    - - name: rtf-service
-        template: rtf-s
+        #- - name: rtf-deployment
+        #template: rtf-d
+        #- - name: rtf-service
+        #template: rtf-s
+    - - name: biomedicus
+        template: run-biomedicus
+
+    - - name: client
+        template: run-client
+
 
 
 #  - name:  mmannotator-daemon
@@ -34,6 +54,25 @@ spec:
 #    metadata:
 #      labels:
 #        app: mmannotator
+#
+#
+
+  - name: run-rtf
+    daemon: true
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+
+  - name: run-biomedicus
+    daemon: true
+    container:
+      image:  ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      command: ["/usr/share/biomedicus/bin/deployBiomedicusPipeline.sh"] 
+
 
   # mmannotator deployment/service
   - name: mmannotator-d
@@ -63,6 +102,12 @@ spec:
                 name: mmannotator
                 ports:
                 - containerPort: 31166
+                env:
+                - name: MMSERVER_HOST 
+                  value: mmserver.default
+                - name: MMSERVER_PORT
+                  value: "8066"
+
 
   
   - name: mmannotator-s
@@ -177,4 +222,20 @@ spec:
           ports:
           - port: 35555
             targetPort: 35555
+
+
+  - name: run-client
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/cpc
+      imagePullPolicy: Never
+      env:
+        - name: NLPADAPT_BROKER_URI
+          value: nio://amq.default:61616
+        - name: NLPADAPT_INPUT_DATASOURCE_URI #NLPADAPT_DATASOURCE_URI
+          value: jdbc:sqlite:mimic-rtf.db
+      command: ["/bin/bash","-c", "groovy /home/groovy/scripts/client.groovy"]
+      volumeMounts:
+      - name: test-rtf
+        mountPath:  /home/groovy/data
+        readOnly: false
 
