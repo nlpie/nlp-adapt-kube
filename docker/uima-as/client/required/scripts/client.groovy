@@ -214,8 +214,11 @@ output.wheneverBound{
     println "processed ${it}"
 }
 
-for(i in fetchRecords(inDataSource, [0,10000])){
+for (int j in 1..10){
+  for(i in fetchRecords(inDataSource, [0,10000])){
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(i))
+  }
+  println "***************** BATCH ${j} *****************"
 }
 
 // multiplier.terminate()
