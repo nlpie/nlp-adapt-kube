@@ -40,9 +40,9 @@ spec:
           
             spec:
               nodeSelector:
-                dns: dns1
+                node: thalia1
               containers:
-              - image: ahc-nlpie-docker.artifactory.umn.edu/activemq
+              - image: ahc-nlpie-docker.artifactory.umn.edu/amq
                 imagePullPolicy: Never
                 name: amq
                 ports:
@@ -82,15 +82,13 @@ spec:
             app: amq
           ports:
           - name: test1 
-            protocol: TCP
+            #protocol: TCP
             port: 8161
             targetPort: 8161
             nodePort: 31345
           - name: test2 
-            protocol: TCP
+            #protocol: TCP
             port: 61616
             targetPort: 61616
             nodePort: 31344
-
-          type: NodePort
-       
+          type: NodePort 
