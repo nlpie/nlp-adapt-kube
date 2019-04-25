@@ -68,7 +68,7 @@ If this parameter is not set by the user, then the analysis engine will try to u
       <nameValuePair>
         <name>metamap_options</name>
         <value>
-          <string>--prune 30 --WSD wsd.default -y</string>
+          <string>--prune 30 -y@ wsd.default</string>
         </value>
       </nameValuePair>
     </configurationParameterSettings>
