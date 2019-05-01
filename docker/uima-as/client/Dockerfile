@@ -71,7 +71,5 @@ ADD --chown=groovy:groovy required/scripts /home/groovy/scripts
 #RUN chown -R groovy:groovy /home/groovy/scripts
 #RUN chown -R groovy:groovy /home/groovy/.groovy
 
-# issue NLPADAPT_BROKER_URI="nio://localhost:61616" groovy CPC.groovy
-# can implement as classpath
 WORKDIR /home/groovy/data
 

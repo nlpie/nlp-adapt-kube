@@ -1,0 +1,275 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  volumes:
+      #  - name: test-data
+      #    hostPath: # change this accordingly to your host system
+      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+      #  - name: test-conf
+      #    hostPath: # change this accordingly to your host system
+      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+  - name: test-rtf
+    hostPath: # change this accordingly to your host system
+      path: /home/gms/projects/k8s/cpc
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    #- - name: biomedicus-rtf
+    #    template: run-rtf
+
+    - - name: mmannotator-deployment
+        template: mmannotator-d
+    - - name: mmannotator-service
+        template: mmannotator-s
+    - - name: mmserver-deployment
+        template: mmserver-d
+    - - name: mmserver-service
+        template: mmserver-s
+        #- - name: rtf-deployment
+        #template: rtf-d
+        #- - name: rtf-service
+        #template: rtf-s
+    #- - name: biomedicus
+    #    template: run-biomedicus
+
+    #- - name: client
+    #    template: run-client
+
+
+
+#  - name:  mmannotator-daemon
+#    daemon: true
+#    container:
+#      image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
+#      imagePullPolicy: Never
+#      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+#      stdin: true 
+#      tty: true 
+#    metadata:
+#      labels:
+#        app: mmannotator
+#
+#
+
+  - name: run-rtf
+    daemon: true
+    nodeSelector:
+      node: atlas0
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      resources:
+        limits:
+          memory: "2G"
+        requests:
+          memory: "250M"
+      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+
+  - name: run-biomedicus
+    daemon: true
+    nodeSelector:
+      node: atlas0
+    container:
+      image:  ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      resources:
+        limits:
+          memory: "5G"
+        requests:
+          memory: "250M"
+      tty: true
+      stdin: true
+      command: ["/usr/share/biomedicus/bin/deployBiomedicusPipeline.sh"] 
+
+
+  # mmannotator deployment/service
+  - name: mmannotator-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mmannotator
+        spec:
+          selector:
+            matchLabels:
+              app: mmannotator
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: mmannotator
+                track: stable
+            spec:
+                #dns: dns1
+              nodeSelector:
+                node: atlas0
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
+                imagePullPolicy: Never
+                name: mmannotator
+                resources:
+                  limits:
+                    memory: "5G"
+                  requests:
+                    memory: "250M"
+                command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+                ports:
+                - containerPort: 31166
+                env:
+                - name: MMSERVER_HOST 
+                  value: mmserver.default
+                - name: MMSERVER_PORT
+                  value: "8066"
+
+  
+  - name: mmannotator-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mmannotator
+          namespace: default
+          labels:
+            app: mmannotator
+        spec:
+          selector:
+            app: mmannotator
+          ports:
+          - port: 31166
+            targetPort: 31166
+
+       
+  - name: mmserver-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mmserver
+        spec:
+          selector:
+            matchLabels:
+              app: mmserver
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: mmserver
+                track: stable
+            spec:
+              nodeSelector:
+                node: atlas0
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/mmserver
+                imagePullPolicy: Never
+                name: mmserver
+                resources:
+                  limits:
+                    memory: "5G"
+                  requests:
+                    memory: "250M"
+                ports:
+                - containerPort: 8066
+                env:
+                - name: TAGGER_SERVER_HOSTS 
+                  value: medpost.default
+                - name: WSD_SERVER_HOSTS
+                  value: wsd.default
+
+  - name: mmserver-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mmserver
+          namespace: default
+          labels:
+            app: mmserver
+        spec:
+          selector:
+            app: mmserver
+          ports:
+          - port: 8066
+            targetPort: 8066
+
+  - name: rtf-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: rtf
+        spec:
+          selector:
+            matchLabels:
+              app: rtf
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: rtf
+                track: stable
+            spec:
+              nodeSelector:
+                node: atlas0
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+                imagePullPolicy: Never
+                command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+                name: rtf
+                ports:
+                - containerPort: 35555
+
+  - name: rtf-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: rtf
+          namespace: default
+          labels:
+            app: rtf
+        spec:
+          selector:
+            app: rtf
+          ports:
+          - port: 35555
+            targetPort: 35555
+
+  - name: run-client
+    nodeSelector:
+      node: atlas0
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/cpc
+      imagePullPolicy: Never
+      resources:
+        limits:
+          memory: "10G"
+        requests:
+          memory: "500M"
+      env:
+        - name: NLPADAPT_BROKER_URI
+          value: nio://amq.default:61616
+        - name: NLPADAPT_INPUT_DATASOURCE_URI #NLPADAPT_DATASOURCE_URI
+          value: jdbc:sqlite:mimic-rtf.db
+      command: ["/bin/bash","-c", "groovy /home/groovy/scripts/client.groovy"]
+      volumeMounts:
+      - name: test-rtf
+        mountPath:  /home/groovy/data
+        readOnly: false
+

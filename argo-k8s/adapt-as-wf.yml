@@ -33,11 +33,12 @@ spec:
     - - name: biomedicus-rtf
         template: run-rtf
     
-    - - name: biomedicus
-        template: run-biomedicus
+        #- - name: biomedicus
+        #template: run-biomedicus
     
-    - - name: client
-        template: run-client
+    
+        #- - name: client
+        #template: run-client
 
         #  - name: amq-server-d
         #    resource:
@@ -113,14 +114,14 @@ spec:
   - name: run-rtf
     daemon: true
     container:
-      image: gms/biomedicus
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
       imagePullPolicy: Never
       command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
     
   - name: run-biomedicus
     daemon: true
     container:
-      image: gms/biomedicus
+      image:  ahc-nlpie-docker.artifactory.umn.edu/biomedicus
       imagePullPolicy: Never
       tty: true
       stdin: true
@@ -128,7 +129,7 @@ spec:
 
   - name: run-client
     container:
-      image: gms/cpc
+      image: ahc-nlpie-docker.artifactory.umn.edu/cpc
       imagePullPolicy: Never
       env:
         - name: NLPADAPT_BROKER_URI

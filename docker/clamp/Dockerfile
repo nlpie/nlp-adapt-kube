@@ -4,7 +4,7 @@ RUN apt-get update
 RUN apt-get -qy install zip
 RUN apt-get -qy install jq 
 
-ADD clamp /usr/share/clamp
+ADD clamp_build /usr/share/clamp
 ADD required/nlpie /usr/share/clamp/nlpie
 ADD required/scripts /usr/share/clamp/scripts
 

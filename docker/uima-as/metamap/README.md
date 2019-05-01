@@ -1,4 +1,4 @@
-Configuration and library files to run MetaMap as a UIMA-AS service. You will need to make sure METAMAP_HOME is set before invoking a service deployment via the included scripts.
+Configuration and library files to run MetaMap as a UIMA-AS service. You will need to make sure`METAMAP_HOME` is set before invoking a service deployment via the included scripts. `MMSERVER_HOST` and `MMSERVER_PORT` can be used to control how the UIMA MetaMapApi Annotator connects to mmserver.
 
 `cp -r required/metamap-as/* $METAMAP_HOME/src/uima` will copy the files to their proper homes in a standard MetaMap UIMA installation.
 

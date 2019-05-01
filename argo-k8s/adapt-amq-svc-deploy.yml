@@ -3,16 +3,10 @@ kind: Workflow                  #new type of k8s spec
 metadata:
   generateName: nlp-adapt-wf-    #name of workflow spec
 spec:
-  entrypoint: nlp-adapt          #invoke the build template
-  volumes:
-  - name: test-volume
-    hostPath:
-      path: /Users/gregsilverman/workspace/test # must match host directory in minikube; cannot be symlinked
-      # path: /Volumes/GrenziData/development/data
+  entrypoint: nlp-adapt-amq-service          #invoke the build template
   
   templates:
-
-  - name: nlp-adapt
+  - name: nlp-adapt-amq-service
     steps:
     - - name: amq-deployment
         template: amq-server-d
