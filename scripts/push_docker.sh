@@ -21,7 +21,7 @@ echo "end ctakes"
 
 echo Begin "uploading metamap image..."
 docker push ahc-nlpie-docker.artifactory.umn.edu/mmserver 
-docker push ahc-nlpie-docker.artifactory.umn.edu/mmnnotator
+docker push ahc-nlpie-docker.artifactory.umn.edu/mmannotator
 docker push ahc-nlpie-docker.artifactory.umn.edu/wsd
 docker push ahc-nlpie-docker.artifactory.umn.edu/medpost 
 echo "end metamap"

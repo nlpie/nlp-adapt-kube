@@ -17,4 +17,4 @@ RUN  /usr/share/public_mm/bin/install.sh
 
 WORKDIR /data
 
-CMD mmserver
+#CMD mmserver

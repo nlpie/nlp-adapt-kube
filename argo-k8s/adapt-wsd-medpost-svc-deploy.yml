@@ -42,6 +42,7 @@ spec:
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/medpost
                 imagePullPolicy: Never
+                command: ["wsd_foreground start"] 
                 resources:
                   limits:
                     memory: "1G"
@@ -95,6 +96,7 @@ spec:
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/wsd
                 imagePullPolicy: Never
+                command["skrmedpost_foreground start"]
                 resources:
                   limits:
                     memory: "3G"

@@ -8,5 +8,5 @@ config=$CLAMP_HOME/config/ServiceConfig.groovy
 
 export UIMA_HOME=$CLAMP_HOME/apache-uima-as-2.10.3
 
-java -DCLAMPLicenceFile="$CLAMP_HOME/CLAMP.LICENSE" -cp $clampjar edu.uth.clamp.nlp.uimaas.Service $pipeline $umls_index $umls_user $umls_pass $config
+java -DCLAMPLicenceFile="$CLAMP_HOME/CLAMP.LICENSE" -Xmx3g -cp $clampjar edu.uth.clamp.nlp.uimaas.Service $pipeline $umls_index $umls_user $umls_pass $config
 

@@ -14,6 +14,5 @@ RUN  /usr/share/public_mm/bin/install.sh
 
 RUN chmod 755 /usr/share/public_mm/bin/wsd_foreground.in
 
-WORKDIR /data
 
-CMD wsd_foreground start
+#CMD wsd_foreground start
