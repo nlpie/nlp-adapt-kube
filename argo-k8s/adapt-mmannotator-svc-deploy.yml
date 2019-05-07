@@ -59,11 +59,6 @@ spec:
                 imagePullPolicy: Never
                 command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
                 name: mmannotator
-                resources:
-                  limits:
-                    memory: "5G"
-                  requests:
-                    memory: "250M"
                 ports:
                 - containerPort: 31166
                 livenessProbe:
@@ -125,11 +120,6 @@ spec:
                 imagePullPolicy: Never
                 command: ["mmserver"] 
                 name: mmserver
-                resources:
-                  limits:
-                    memory: "5G"
-                  requests:
-                    memory: "250M"
                 ports:
                 - containerPort: 8066
                 livenessProbe:
@@ -137,7 +127,7 @@ spec:
                     command:
                     - /bin/sh
                     - -c
-                    - nslookup mmannotator.default && nslookup mmserver.default && nslookup wsd.default
+                    - nslookup mmannotator.default && nslookup mmserver.default && nslookup wsd.default && nslookup medpost.default
                   initialDelaySeconds: 60
                 env:
                 - name: TAGGER_SERVER_HOSTS 
