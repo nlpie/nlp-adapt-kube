@@ -52,9 +52,8 @@ spec:
                 app: mmannotator
                 track: stable
             spec:
-                #dns: dns1
-              nodeSelector:
-                node: atlas0
+                #nodeSelector:
+                #node: atlas0
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/mmannotator
                 imagePullPolicy: Never
@@ -67,6 +66,13 @@ spec:
                     memory: "250M"
                 ports:
                 - containerPort: 31166
+                livenessProbe:
+                  exec:
+                    command:
+                    - /bin/sh
+                    - -c
+                    - nslookup mmserver.default && nslookup mmannotator.default
+                  initialDelaySeconds: 30
                 env:
                 - name: MMSERVER_HOST 
                   value: mmserver.default
@@ -112,8 +118,8 @@ spec:
                 app: mmserver
                 track: stable
             spec:
-              nodeSelector:
-                node: atlas0
+                #nodeSelector:
+                #node: atlas0
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/mmserver
                 imagePullPolicy: Never
@@ -126,6 +132,13 @@ spec:
                     memory: "250M"
                 ports:
                 - containerPort: 8066
+                livenessProbe:
+                  exec:
+                    command:
+                    - /bin/sh
+                    - -c
+                    - nslookup mmannotator.default && nslookup mmserver.default && nslookup wsd.default
+                  initialDelaySeconds: 60
                 env:
                 - name: TAGGER_SERVER_HOSTS 
                   value: medpost.default

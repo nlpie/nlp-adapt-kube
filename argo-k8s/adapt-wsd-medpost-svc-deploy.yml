@@ -37,17 +37,13 @@ spec:
                 app: medpost
                 track: stable
             spec:
-              nodeSelector:
-                node: bpb
+                #nodeSelector:
+                #node: bpb
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/medpost
                 imagePullPolicy: Never
-                command: ["wsd_foreground start"] 
-                resources:
-                  limits:
-                    memory: "1G"
-                  requests:
-                    memory: "500M"
+                command: [sh, -c]
+                args: ["skrmedpost_foreground start"] 
                 name: medpost
                 ports:
                 - containerPort: 1795
@@ -91,17 +87,13 @@ spec:
                 track: stable
           
             spec:
-              nodeSelector:
-                node: hermes
+                #nodeSelector:
+                #node: hermes
               containers:
               - image: ahc-nlpie-docker.artifactory.umn.edu/wsd
                 imagePullPolicy: Never
-                command["skrmedpost_foreground start"]
-                resources:
-                  limits:
-                    memory: "3G"
-                  requests:
-                    memory: "500M"
+                command: [sh, -c]
+                args: ["wsd_foreground start"]
                 name: wsd
                 ports:
                 - containerPort: 5554
