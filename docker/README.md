@@ -2,3 +2,5 @@
 
 ### 
 - Customized uima-as annotators 
+- ActiveMQ
+- Custom CPC clients
