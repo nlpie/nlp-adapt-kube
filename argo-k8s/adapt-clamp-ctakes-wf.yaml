@@ -1,0 +1,135 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-clamp-ctakes-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-uima-services          #invoke the build template
+  
+  templates:
+
+  - name: nlp-adapt-uima-services
+    steps:
+    
+    - - name: ctakes-deployment
+        template: ctakes-d
+    - - name: ctakes-service
+        template: ctakes-s
+#    - - name: clamp-deployment
+#        template: clamp-d
+#    - - name: clamp-service
+#        template: clamp-s
+
+
+  - name: clamp-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: clamp
+        spec:
+          selector:
+            matchLabels:
+              app: clamp
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: clamp
+                track: stable
+            spec:
+              nodeSelector:
+                node: bpb
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/clamp
+                imagePullPolicy: Never
+                env:
+                - name: _JAVA_OPTIONS
+                  value: "-Dhttp.proxyHost=HOSTNAME -Dhttp.proxyPort=3128 -Dhttps.proxyHost=HOSTNAME -Dhttps.proxyPort=3128"
+                - name: umls_user          
+                  value: "USERNAME"
+                - name: umls_pass          
+                  value: "PASSWORD``"
+                command: ["/usr/share/clamp/bin/deployClampPipeline.sh"] 
+                stdin: true 
+                tty: true 
+                name: clamp
+                ports:
+                - containerPort: 35555
+
+  - name: clamp-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: clamp
+          namespace: default
+          labels:
+            app: clamp
+        spec:
+          selector:
+            app: clamp
+          ports:
+          - port: 35555
+            targetPort: 35555
+
+
+  - name: ctakes-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ctakes
+        spec:
+          selector:
+            matchLabels:
+              app: ctakes
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: ctakes
+                track: stable
+            spec:
+              nodeSelector:
+                node: bpb
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/ctakes
+                imagePullPolicy: Never
+                env:
+                - name: _JAVA_OPTIONS
+                  value: "-Dhttp.proxyHost=HOSTNAME -Dhttp.proxyPort=3128 -Dhttps.proxyHost=HOSTNAME -Dhttps.proxyPort=3128"
+                - name: ctakes_umlsuser          
+                  value: "USERNAME"
+                - name: ctakes_umlspw          
+                  value: "PASSWORD"
+                command: ["bin/deployCtakesPipeline.sh"] 
+                stdin: true 
+                tty: true 
+                name: ctakes
+                ports:
+                - containerPort: 35555
+
+  - name: ctakes-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: ctakes
+          namespace: default
+          labels:
+            app: ctakes
+        spec:
+          selector:
+            app: ctakes
+          ports:
+          - port: 35555
+            targetPort: 35555
+

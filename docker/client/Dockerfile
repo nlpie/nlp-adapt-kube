@@ -52,21 +52,23 @@ RUN set -o errexit -o nounset \
     && ln --symbolic "${GROOVY_HOME}/bin/groovysh" /usr/bin/groovysh \
     && ln --symbolic "${GROOVY_HOME}/bin/java2groovy" /usr/bin/java2groovy \
     \
-    && echo "Adding groovy user and group" \
-    && groupadd --system --gid 1000 groovy \
-    && useradd --system --gid groovy --uid 1000 --shell /bin/bash --create-home groovy \
+    #&& echo "Adding groovy user and group" \
+    #&& groupadd --system --gid 1000 groovy \
+    #&& useradd --system --gid groovy --uid 1000 --shell /bin/bash --create-home groovy \
     && mkdir --parents /home/groovy/.groovy/grapes \
-    && chown --recursive groovy:groovy /home/groovy \
+    #&& chown --recursive groovy:groovy /home/groovy \
     \
     && echo "Symlinking root .groovy to groovy .groovy" \
     && ln -s /home/groovy/.groovy /root/.groovy
 
 # Create Grapes volume
-USER groovy
+#USER groovy
 VOLUME "/home/groovy/.groovy/grapes"
 
-ADD --chown=groovy:groovy required/lib /home/groovy/.groovy/lib
-ADD --chown=groovy:groovy required/scripts /home/groovy/scripts
+#ADD --chown=groovy:groovy required/lib /home/groovy/.groovy/lib
+#ADD --chown=groovy:groovy required/scripts /home/groovy/scripts
+ADD required/lib /home/groovy/.groovy/lib
+ADD required/scripts /home/groovy/scripts
 
 #RUN chown -R groovy:groovy /home/groovy/scripts
 #RUN chown -R groovy:groovy /home/groovy/.groovy
