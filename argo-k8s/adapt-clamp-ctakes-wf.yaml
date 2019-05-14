@@ -50,7 +50,7 @@ spec:
                 - name: umls_user          
                   value: "USERNAME"
                 - name: umls_pass          
-                  value: "PASSWORD``"
+                  value: "PASSWORD"
                 command: ["/usr/share/clamp/bin/deployClampPipeline.sh"] 
                 stdin: true 
                 tty: true 
