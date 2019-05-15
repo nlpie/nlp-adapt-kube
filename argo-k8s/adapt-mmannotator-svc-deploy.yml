@@ -66,7 +66,8 @@ spec:
                     command:
                     - /bin/sh
                     - -c
-                    - nslookup mmserver.default && nslookup mmannotator.default
+                    - nslookup mmserver.default && 
+                      nslookup mmannotator.default
                   initialDelaySeconds: 30
                 env:
                 - name: MMSERVER_HOST 
@@ -127,7 +128,10 @@ spec:
                     command:
                     - /bin/sh
                     - -c
-                    - nslookup mmannotator.default && nslookup mmserver.default && nslookup wsd.default && nslookup medpost.default
+                    - nslookup mmannotator.default && 
+                      nslookup mmserver.default && 
+                      nslookup wsd.default && 
+                      nslookup medpost.default
                   initialDelaySeconds: 60
                 env:
                 - name: TAGGER_SERVER_HOSTS 
