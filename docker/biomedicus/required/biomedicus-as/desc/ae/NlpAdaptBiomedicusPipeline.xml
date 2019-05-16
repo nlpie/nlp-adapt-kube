@@ -9,44 +9,29 @@
     <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
     <primitive>false</primitive>
     <delegateAnalysisEngineSpecifiers>
-        <!-- <delegateAnalysisEngine key="aggregateRtf"> -->
-        <!--     <import location="RtfPipeline.xml"/> -->
-        <!-- </delegateAnalysisEngine> -->
+        <delegateAnalysisEngine key="aggregateRtf">
+            <import location="RtfPipeline.xml"/>
+        </delegateAnalysisEngine>
         <delegateAnalysisEngine key="defaultPipeline">
             <import location="DefaultClinicalDocumentsPipeline.xml"/>
         </delegateAnalysisEngine>
-	<!-- <delegateAnalysisEngine key="mqXmiWriter"> -->
-        <!--     <import location="newInfo/outbound/MqWriter.xml"/> -->
-        <!-- </delegateAnalysisEngine> -->
+	<delegateAnalysisEngine key="noop">
+            <import location="NlpAdaptNoOpAnnotator.xml"/>
+        </delegateAnalysisEngine>
     </delegateAnalysisEngineSpecifiers>
     <analysisEngineMetaData>
-        <name>BioMedICUS Outbound Pipeline</name>
+        <name>NLPADAPT BioMedICUS Pipeline</name>
         <version>${project.version}</version>
         <vendor>${project.organization.name}</vendor>
         <flowConstraints>
             <fixedFlow>
-                <!-- <node>aggregateRtf</node> -->
+                <node>aggregateRtf</node>
                 <node>defaultPipeline</node>
+		<node>noop</node>
 		<!-- <node>mqXmiWriter</node> -->
             </fixedFlow>
         </flowConstraints>
-        <!--<configurationParameters>
-            <configurationParameter>
-                <name>xmiOutputDir</name>
-                <type>String</type>
-                <overrides>
-                    <param>xmiWriter/outputDirectory</param>
-                </overrides>
-            </configurationParameter>
-        </configurationParameters>
-        <configurationParameterSettings>
-            <nameValuePair>
-                <name>xmiOutputDir</name>
-                <value>
-                    <string>/home/rmcewan/ahrq_realtime/output/xmi-output</string>
-                </value>
-            </nameValuePair>
-        </configurationParameterSettings>-->
+
         <operationalProperties>
             <modifiesCas>true</modifiesCas>
             <multipleDeploymentAllowed>true</multipleDeploymentAllowed>
