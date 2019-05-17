@@ -96,9 +96,8 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 }
 
 outputQueue.wheneverBound {
-  def bit = it
   group.actor{
-    rtfDatabaseWrite.send bit
+    rtfDatabaseWrite.send outputQueue.val
     react {
       println "$it"
     }
