@@ -41,7 +41,7 @@ final def rtfPipeline = getUimaPipelineClient(
     env["NLPADAPT_BROKER_URI"],
     "nlpadapt.rtf.outbound",
     new RtfCallbackListener(outputQueue),
-    4
+    8
 );
 
 final def rtfArtificer = group.reactor {
