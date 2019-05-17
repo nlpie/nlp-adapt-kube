@@ -1,4 +1,5 @@
 import java.util.concurrent.TimeUnit
+import java.text.Normalizer
 
 import groovy.io.FileType
 import groovy.sql.Sql
@@ -21,6 +22,8 @@ import edu.umn.biomedicus.uima.adapter.UimaAdapters
 def env = System.getenv();
 def group = new DefaultPGroup(8);
 def dataSource = new BasicDataSource();
+dataSource.setPoolPreparedStatements(true)
+dataSource.setMaxTotal(5)
 dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"]);
 dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"])
 dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"])
@@ -55,16 +58,20 @@ final def rtfArtificer = group.reactor {
 }
 
 final def rtfDatabaseWrite = group.reactor {
-  def sql = Sql.newInstance(dataSource);
   if(it.rtf_pipeline == 'P'){
     // Do QUARANTINE here
-    sql.executeUpdate "UPDATE u01_tmp SET rtf2plain=$it.rtf2plain, rtf_pipeline=$it.rtf_pipeline WHERE note_id=$it.note_id"
+    // NEEDS EDITED FLAG
+    def norm = Normalizer.normalize(it.rtf2plain, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+    def sql = Sql.newInstance(dataSource);
+    sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf2plain=$norm, rtf_pipeline=$it.rtf_pipeline WHERE note_id=$it.note_id"
+    sql.close();
     reply "SUCCESS: $it.note_id"
   } else {
-    sql.executeUpdate "UPDATE u01_tmp SET rtf_pipeline=$it.rtf_pipeline, error=$it.error WHERE note_id=$it.note_id"
+    def sql = Sql.newInstance(dataSource);
+    sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf_pipeline=$it.rtf_pipeline, error=$it.error WHERE note_id=$it.note_id"
+    sql.close();
     reply "ERROR:   $it.note_id"
   }
-  sql.close();
 }
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
@@ -108,10 +115,10 @@ outputQueue.wheneverBound {
 while(true){
   def in_db = Sql.newInstance(dataSource);
   in_db.withStatement { stmt ->
-    stmt.setFetchSize(25)
+    stmt.setFetchSize(50)
   }
 
-  in_db.eachRow("SELECT rh.content, u.* FROM u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_all r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"){ row ->
+  in_db.eachRow("SELECT rh.content, u.* FROM nlp_sandbox.u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_all r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"){ row ->
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
   }
   
