@@ -89,7 +89,7 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 	
 	this.output << row
       } else {
-	def row = [note_id:filename, rtf_pipeline:'E' ]
+	def row = [note_id:filename, rtf_pipeline:'E', error:aStatus.getStatusMessage().take(3999)]
 	this.output << row
       }
     }
