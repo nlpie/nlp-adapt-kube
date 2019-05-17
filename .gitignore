@@ -24,6 +24,7 @@ docker/nlp-tab/nlptab-webapp
 **/biomedicus-distribution-2.1.0-release
 **/ClampUimaAs_1.6.0.pre
 config
-
+**/biomedicus-distribution-2.2.0-SNAPSHOT-release
+**ojdbc7.jar
 **/data
 **/conf*
