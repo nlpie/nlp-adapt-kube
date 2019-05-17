@@ -19,12 +19,13 @@ import edu.umn.biomedicus.uima.adapter.UimaAdapters
 
 
 def env = System.getenv();
-def group = new DefaultPGroup(4);
-def inDataSource = new BasicDataSource();
-inDataSource.setUrl(env["NLPADAPT_INPUT_DATASOURCE_URI"]);
-def outDataSource = new BasicDataSource();
-outDataSource.setUrl(env["NLPADAPT_OUTPUT_DATASOURCE_URI"]);
+def group = new DefaultPGroup(8);
+def dataSource = new BasicDataSource();
+dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"]);
+dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"])
+dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"])
 
+def outputQueue = new DataflowQueue()
 
 def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
@@ -39,59 +40,79 @@ def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
 final def rtfPipeline = getUimaPipelineClient(
     env["NLPADAPT_BROKER_URI"],
     "nlpadapt.rtf.outbound",
-    new RtfCallbackListener(outDataSource),
+    new RtfCallbackListener(outputQueue),
     4
-)
+);
 
 final def rtfArtificer = group.reactor {
     def cas = rtfPipeline.getCAS()
-    def note = it.contents // for toy sqlite schema
-    def doc_id = it.rowid // for toy sqlite schema
+    def note = it.content?.characterStream?.text
+    def doc_id = it.note_id
     def to_process = cas.createView("OriginalDocument")
     to_process.setDocumentText(note)
     UimaAdapters.createArtifact(cas, null, doc_id.toString())
     reply cas
 }
 
+final def rtfDatabaseWrite = group.reactor {
+  def sql = Sql.newInstance(dataSource);
+  if(it.rtf_pipeline == 'P'){
+    // Do QUARANTINE here
+    sql.executeUpdate "UPDATE u01_tmp SET rtf2plain=$it.rtf2plain, rtf_pipeline=$it.rtf_pipeline WHERE note_id=$it.note_id"
+    reply "SUCCESS: $it.note_id"
+  } else {
+    sql.executeUpdate "UPDATE u01_tmp SET rtf_pipeline=$it.rtf_pipeline, error=$it.error WHERE note_id=$it.note_id"
+    reply "ERROR:   $it.note_id"
+  }
+}
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
-  BasicDataSource output;
+  DataflowQueue output;
 
-    RtfCallbackListener(BasicDataSource output){
+    RtfCallbackListener(DataflowQueue output){
 	this.output = output
     }
   
     @Override
     void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-
-	Type type = aCas.getTypeSystem().getType("ArtifactID");
+      Type type = aCas.getTypeSystem().getType("ArtifactID");
 	Feature documentId = type.getFeatureByBaseName("artifactID");
 	String filename = aCas.getView("metadata")
             .getIndexRepository()
             .getAllIndexedFS(type)
             .next()
 	    .getStringValue(documentId)
+	
+      if(!aStatus.isException()){
 	String documentText = aCas.getView("Analysis").getDocumentText()
-
 	def row = [note_id:filename, rtf2plain:documentText, rtf_pipeline:'P']
-	def sql = Sql.newInstance(this.output);
-	sql.executeUpdate "UPDATE source_note SET rtf2plain=$row.rtf2plain, rtf_pipeline=$row.rtf_pipeline WHERE note_id=$row.note_id"
+	
+	this.output << row
+      } else {
+	def row = [note_id:filename, rtf_pipeline:'E' ]
+	this.output << row
+      }
     }
 }
 
-def out_db = Sql.newInstance(outDataSource);
-out_db.withStatement { stmt ->
-  stmt.setFetchSize(25)
+outputQueue.wheneverBound {
+  def bit = it
+  group.actor{
+    rtfDatabaseWrite.send bit
+    react {
+      println "$it"
+    }
+  }
 }
 
-def in_db = Sql.newInstance(inDataSource);
+def in_db = Sql.newInstance(dataSource);
 in_db.withStatement { stmt ->
   stmt.setFetchSize(25)
 }
 
 while(true){
-  def note_ids = out_db.rows("SELECT note_id FROM source_note WHERE rtf_pipeline='U' limit 1000")*.note_id;
-  def query = "SELECT rowid, doc_id, contents FROM txts WHERE rowid IN (${note_ids.join(',')})".toString();
+  
+  def query = "SELECT rh.content, u.* FROM u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_all r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"
 
   in_db.eachRow(query){ row ->
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
