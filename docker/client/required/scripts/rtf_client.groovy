@@ -41,7 +41,7 @@ final def rtfPipeline = getUimaPipelineClient(
     env["NLPADAPT_BROKER_URI"],
     "nlpadapt.rtf.outbound",
     new RtfCallbackListener(outputQueue),
-    4
+    8
 );
 
 final def rtfArtificer = group.reactor {
@@ -64,6 +64,7 @@ final def rtfDatabaseWrite = group.reactor {
     sql.executeUpdate "UPDATE u01_tmp SET rtf_pipeline=$it.rtf_pipeline, error=$it.error WHERE note_id=$it.note_id"
     reply "ERROR:   $it.note_id"
   }
+  sql.close();
 }
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
@@ -104,18 +105,17 @@ outputQueue.wheneverBound {
   }
 }
 
-def in_db = Sql.newInstance(dataSource);
-in_db.withStatement { stmt ->
-  stmt.setFetchSize(25)
-}
-
 while(true){
-  
-  def query = "SELECT rh.content, u.* FROM u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_all r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"
+  def in_db = Sql.newInstance(dataSource);
+  in_db.withStatement { stmt ->
+    stmt.setFetchSize(25)
+  }
 
-  in_db.eachRow(query){ row ->
+  in_db.eachRow("SELECT rh.content, u.* FROM u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_all r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"){ row ->
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
   }
+  
+  in_db.close();
 }
 
 // multiplier.terminate()
