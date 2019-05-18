@@ -79,7 +79,7 @@ final def metamapDatabaseWrite = group.reactor { data ->
     sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
-    sql.executeUpdate "UPDATE u01_tmp SET error=$data.error WHERE note_id=$data.note_id"
+    sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
   sql.close()
