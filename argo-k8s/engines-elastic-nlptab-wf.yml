@@ -78,8 +78,6 @@ spec:
       - name: test-volume
         mountPath: /data
         readOnly: false
-      - name: clamp-configmap
-          mountPath: /user/share/clamp/CLAMP.LICENSE
 
   - name: run-amicus
     container:

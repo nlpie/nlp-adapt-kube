@@ -14,13 +14,12 @@ docker/clamp/clamp-old
 docker/clamp/required/license
 *ctakes-distribution
 *public_mm
-*public_mm_2016
 *apache-uima
-*apache-uima-as-2.10.3
 docker/metamap/apache-uima
 docker/nlp-tab/nlptab-webapp
 *ClampUimaAs_1.5.1
 *license
+*apache-uima-as-2.10.3
 **/biomedicus-distribution-2.1.0-release
 **/ClampUimaAs_1.6.0.pre
 config
