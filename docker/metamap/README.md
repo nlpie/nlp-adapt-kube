@@ -3,7 +3,7 @@ Two options for building MetaMap ->
 * `mm_server_annotator`: bundled `mmserver` and `mm annotator`
 * `mmserver` `mmannotator`: individualized containers
 
-NB: wsd and medpost-skr both needed for either options
+NB: `wsd` and `medpost-skr` are both needed for either option
 
 --
 
