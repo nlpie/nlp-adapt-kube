@@ -1,5 +1,6 @@
 import java.util.concurrent.TimeUnit
 import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 import groovy.io.FileType
 import groovy.sql.Sql
@@ -79,6 +80,7 @@ final def clampDatabaseWrite = group.reactor { data ->
     sql.executeUpdate "UPDATE u01_tmp SET clamp=$data.clamp, xmi=$data.xmi WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
+    data.error = data.error?.toString().take(3999)
     sql.executeUpdate "UPDATE u01_tmp SET clamp=$data.clamp, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
@@ -110,7 +112,10 @@ class ClampCallbackListener extends UimaAsBaseCallbackListener {
 	  def process_results = [note_id:source_note_id, clamp:'P', xmi:xmi]
 	  this.output << process_results
 	} else {
-	  def process_results = [note_id:source_note_id, clamp:'E', error:aStatus.getStatusMessage().take(3999)]
+	  ByteArrayOutputStream errors = new ByteArrayOutputStream();
+	  PrintStream ps = new PrintStream(errors);
+	  for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+	  def process_results = [note_id:source_note_id, clamp:'E', error:errors]
 	  this.output << process_results
 	}
 	

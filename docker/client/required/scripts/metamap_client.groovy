@@ -1,4 +1,6 @@
 import java.util.concurrent.TimeUnit
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 import groovy.io.FileType
 import groovy.sql.Sql
@@ -79,6 +81,7 @@ final def metamapDatabaseWrite = group.reactor { data ->
     sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
+    data.error = data.error?.toString().take(3999)
     sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
@@ -142,13 +145,16 @@ class MetamapCallbackListener extends UimaAsBaseCallbackListener {
 	negated: (negated.containsKey(item) && [it.getBegin(), it.getEnd()] in negated[item]) ? 'T' : 'F',
       	text:it.getStringValue(text)
       	]
-      }
+      };
       
       if(!aStatus.isException()){
       	def process_results = [note_id:source_note_id, mm:'P', items:filtered_items]
       	this.output << process_results
       } else {
-      	def process_results = [note_id:source_note_id, mm:'E', error:aStatus.getStatusMessage().take(3999)]
+	ByteArrayOutputStream errors = new ByteArrayOutputStream();
+	PrintStream ps = new PrintStream(errors);
+	for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+      	def process_results = [note_id:source_note_id, mm:'E', error:errors]
       	this.output << process_results
       }
     }

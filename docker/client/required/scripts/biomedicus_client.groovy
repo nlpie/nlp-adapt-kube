@@ -1,5 +1,6 @@
 import java.util.concurrent.TimeUnit
 import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 import groovy.io.FileType
 import groovy.sql.Sql
@@ -77,6 +78,7 @@ final def biomedicusDatabaseWrite = group.reactor { data ->
     sql.executeUpdate "UPDATE u01_tmp SET b9=$data.b9, xmi=$data.xmi WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
+    data.error = data.error?.toString().take(3999)
     sql.executeUpdate "UPDATE u01_tmp SET b9=$data.b9, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
@@ -108,7 +110,10 @@ class BiomedicusCallbackListener extends UimaAsBaseCallbackListener {
 	  def process_results = [note_id:source_note_id, b9:'P', xmi:xmi]
 	  this.output << process_results
 	} else {
-	  def process_results = [note_id:source_note_id, b9:'E', error:aStatus.getStatusMessage().take(3999)]
+	  ByteArrayOutputStream errors = new ByteArrayOutputStream();
+	  PrintStream ps = new PrintStream(errors);
+	  for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+	  def process_results = [note_id:source_note_id, b9:'E', error:errors]
 	  this.output << process_results
 	}
 	
