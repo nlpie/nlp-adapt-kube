@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-amq-service          #invoke the build template
+  
+  templates:
+  - name: nlp-adapt-amq-service
+    steps:
+    - - name: amq-deployment
+        template: amq-server-d
+    - - name: amq-service
+        template: amq-server-s
+  
+  - name: amq-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: amq
+        spec:
+          selector:
+            matchLabels:
+              app: amq
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: amq
+                track: stable
+          
+            spec:
+              nodeSelector:
+                node: thalia1
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/amq
+                imagePullPolicy: Never
+                name: amq
+                ports:
+                - containerPort: 61616
+                - containerPort: 8161
+                volumeMounts:
+                - name: test-data
+                  mountPath: /opt/activemq/data
+                  readOnly: false  
+                - name: test-conf
+                  mountPath: /opt/activemq/conf
+                  readOnly: false  
+              
+              volumes:
+              - name: test-data
+                hostPath:
+                  path:  /home/gms/projects/k8s/amq/data
+              - name: test-conf
+                hostPath:
+                  path:  /home/gms/projects/k8s/amq/conf
+
+
+  - name: amq-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: amq
+          namespace: default
+          labels:
+            app: amq
+
+        spec:
+          selector:
+            app: amq
+          ports:
+          - name: test1 
+            #protocol: TCP
+            port: 8161
+            targetPort: 8161
+            nodePort: 31345
+          - name: test2 
+            #protocol: TCP
+            port: 61616
+            targetPort: 61616
+            nodePort: 31344
+          type: NodePort 

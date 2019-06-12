@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016 Regents of the University of Minnesota - All Rights Reserved
+  ~ Unauthorized Copying of this file, via any medium is strictly prohibited
+  ~ Proprietary and Confidential
+  -->
+
+<analysisEngineDescription xmlns="http://uima.apache.org/resourceSpecifier">
+    <frameworkImplementation>org.apache.uima.java</frameworkImplementation>
+    <primitive>false</primitive>
+    <delegateAnalysisEngineSpecifiers>
+        <delegateAnalysisEngine key="aggregateRtf">
+            <import location="RtfPipeline.xml"/>
+        </delegateAnalysisEngine>
+        <!-- <delegateAnalysisEngine key="defaultPipeline"> -->
+        <!--     <import location="DefaultClinicalDocumentsPipeline.xml"/> -->
+        <!-- </delegateAnalysisEngine> -->
+	<!-- <delegateAnalysisEngine key="mqXmiWriter"> -->
+        <!--     <import location="newInfo/outbound/MqWriter.xml"/> -->
+        <!-- </delegateAnalysisEngine> -->
+    </delegateAnalysisEngineSpecifiers>
+    <analysisEngineMetaData>
+        <name>RTF Outbound Pipeline</name>
+        <version>${project.version}</version>
+        <vendor>${project.organization.name}</vendor>
+        <flowConstraints>
+            <fixedFlow>
+                <node>aggregateRtf</node>
+                <!-- <node>defaultPipeline</node> -->
+		<!-- <node>mqXmiWriter</node> -->
+            </fixedFlow>
+        </flowConstraints>
+        <!--<configurationParameters>
+            <configurationParameter>
+                <name>xmiOutputDir</name>
+                <type>String</type>
+                <overrides>
+                    <param>xmiWriter/outputDirectory</param>
+                </overrides>
+            </configurationParameter>
+        </configurationParameters>
+        <configurationParameterSettings>
+            <nameValuePair>
+                <name>xmiOutputDir</name>
+                <value>
+                    <string>/home/rmcewan/ahrq_realtime/output/xmi-output</string>
+                </value>
+            </nameValuePair>
+        </configurationParameterSettings>-->
+        <operationalProperties>
+            <modifiesCas>true</modifiesCas>
+            <multipleDeploymentAllowed>true</multipleDeploymentAllowed>
+            <outputsNewCASes>false</outputsNewCASes>
+        </operationalProperties>
+    </analysisEngineMetaData>
+
+    <externalResourceDependencies>
+        <externalResourceDependency>
+            <key>guiceInjector</key>
+            <description>The guice injector resource.</description>
+        </externalResourceDependency>
+    </externalResourceDependencies>
+
+    <resourceManagerConfiguration>
+        <externalResources>
+            <externalResource>
+                <name>guiceInjector</name>
+                <description>The guice resource.</description>
+                <customResourceSpecifier>
+                    <resourceClassName>edu.umn.biomedicus.uima.adapter.GuiceInjector</resourceClassName>
+                </customResourceSpecifier>
+            </externalResource>
+        </externalResources>
+        <externalResourceBindings>
+            <externalResourceBinding>
+                <key>guiceInjector</key>
+                <resourceName>guiceInjector</resourceName>
+            </externalResourceBinding>
+        </externalResourceBindings>
+    </resourceManagerConfiguration>
+</analysisEngineDescription>
