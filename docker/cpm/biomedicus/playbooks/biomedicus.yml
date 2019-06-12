@@ -1,0 +1,51 @@
+# ansible-playbook test_ctakes.yml --user=gms --ask-sudo-pass
+---
+- hosts: 127.0.0.1
+  connection: local
+  #sudo: true
+  vars:
+    download_dir: ~/development/nlp/test
+    ctakes_dir: ~/development/nlp/test
+    path_test: ~/development/nlp/test
+    biomedicus_src: https://athena.ahc.umn.edu/biomedicus-downloads/verify-umls/biomedicus-data-1.8.1-umls-license-required.zip
+    biomedicus_no_umls_src: https://github.com/nlpie/biomedicus/releases/download/v1.8.4/biomedicus-data-1.8.4-umls.zip
+    biomedicus_zip: biomedicus_distro.zip
+    env_dir: /etc/profile
+    bash_profile: ~/.bash_profile
+    umls_user: ""
+    umls_pw: ""
+    user: gms
+  tasks:
+  - name: Prepare Install folder
+    file: path={{download_dir}} state=directory
+    become: yes
+    become_user: gms
+  - name: Download biomedicus no umls
+    get_url: url={{biomedicus_no_umls_src}} dest={{download_dir}}
+    become: yes
+    become_user: gms
+    validate_certs: no
+  - name: POST biomedicus request via curl w/o umls
+    shell: 'curl -d umlsuser="{{ umls_user }}" \
+                 -d umlspw="{{ umls_pw }}" \
+                 {{ biomedicus_no_umls_src }}" \
+                 -o {{biomedicus_zip}}'
+    when: (umls_user is undefined)
+          or
+          (umls_user is none)
+          or
+          (umls_user | trim == "")
+           
+  - name: POST biomedicus request via curl with umls
+    shell: 'curl -d umlsuser="{{ umls_user }}" \
+                 -d umlspw="{{ umls_pw }}" \
+                 {{ biomedicus_src }}" \
+                 -o {{biomedicus_zip}}'
+    when: not(
+          (umls_user is undefined)
+          or
+          (umls_user is none)
+          or
+          (umls_user | trim == "")
+          ) 
+ 
