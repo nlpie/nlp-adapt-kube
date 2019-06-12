@@ -75,6 +75,8 @@ export PATH
 
 runCPE.sh $METAMAP_HOME/nlpie/MetaMapCPM_nlpie.xml
 
+mkdir -p $METAMAP_OUT
+
 ##### Create Archive for NLP-TAB #####
 cp $METAMAP_HOME/nlpie/CombinedTypeSystem.xml $METAMAP_OUT/TypeSystem.xml
 if [ ! -f $SAMPLE_FILE ]; then
