@@ -28,7 +28,7 @@ done
 
 mmserver &
 	
-source /usr/share/public_mm/src/uima/bin/setup_uima.sh
+source /usr/share/public_mm/scripts/setup_uima.sh
 
 mkdir -p $METAMAP_OUT
 
