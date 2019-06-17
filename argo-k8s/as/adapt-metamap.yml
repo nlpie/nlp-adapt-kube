@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-mm-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  volumes:
+  - name: test-rtf
+    hostPath: # change this accordingly to your host system
+      path: /home/gms/projects/k8s/cpc
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    - - name: metamap-server-annotator
+        template: run-metamap
+        withSequence: # spin up arbitrary number pods
+          count: 1
+
+  # mm server and annotator
+  - name: run-metamap
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      name: metamap
+      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+      ports:
+      - containerPort: 8066
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          -  nslookup medpost.default &&
+          -  nslookup wsd1.default &&
+          -  ps aux | grep mmserver  
+        initialDelaySeconds: 60
+      env:
+      - name: TAGGER_SERVER_HOSTS 
+        value: medpost.default
+      - name: WSD_SERVER_HOSTS
+        value: wsd1.default
+      - name: MMSERVER_HOST 
+        value: localhost
+      - name: MMSERVER_PORT
+        value: "8066"
+
+  - name: run-client-metamap
+    nodeSelector:
+      node: thalia2
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/cpc
+      imagePullPolicy: Never
+      env:
+        - name: NLPADAPT_BROKER_URI
+          value: nio://amq.default:61616
+        - name: NLPADAPT_DATASOURCE_URI #NLPADAPT_DATASOURCE_URI
+          value: jdbc:oracle:thin:@ctsidbprod0.ahc.umn.edu:1521:TIDEPRDP
+        #- name: NLPADAPT_DATASOURCE_USERNAME
+        #  value: NLP_ADAPT[NLP_SANDBOX]
+        #- name: NLPADAPT_DATASOURCE_PASSWORD
+        #  value: aifa0iepah_m1Iex
+        - name: NLPADAPT_DATASOURCE_USERNAME
+          value: <USER NAME>
+        - name: NLPADAPT_DATASOURCE_PASSWORD
+          value: <PW>
+          command: ["/bin/bash","-c", "groovy /home/groovy/scripts/metamap_client.groovy"]
+      volumeMounts:
+      - name: test-rtf
+        mountPath:  /home/groovy/data
+        readOnly: false

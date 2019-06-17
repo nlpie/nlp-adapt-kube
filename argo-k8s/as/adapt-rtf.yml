@@ -1,0 +1,20 @@
+ApiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: run-adapt          #invoke the build template
+
+  templates:
+  - name: run-adapt
+    steps:
+    - - name: rtf
+        template: run-rtf
+    
+  - name: run-rtf
+    daemon: true
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/biomedicus
+      imagePullPolicy: Never
+      command: ["/usr/share/biomedicus/bin/deployRtfPipeline.sh"] 
+    

@@ -79,14 +79,3 @@ spec:
         mountPath: /data
         readOnly: false
 
-  - name: run-amicus
-    container:
-      image: ahc-nlpie-docker.artifactory.umn.edu/amicus
-      imagePullPolicy: Never
-      tty: true
-      stdin: true
-      command: ["/usr/share/public_mm/scripts/run_amicus.sh"] 
-      volumeMounts:
-      - name: test-volume
-        mountPath: /data
-        readOnly: false

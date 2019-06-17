@@ -15,14 +15,10 @@ spec:
   templates:
   - name: run-adapt
     steps:
-    - - name: run-others
+    - - name: run-clamp
+        template: run-clamp
+      - name: run-others
         template: run-others
-        #- name: run-others
-        #template: run-others
-        #- - name: run-clamp
-        #template: run-clamp
-        #- name: run-others
-        #template: run-others
 
   - name: run-clamp # single '-' run steps in parallel, double '--' run serially
     container: # run container; needed separately from others to use volume-mount for configmap
@@ -99,14 +95,3 @@ spec:
         readOnly: false
 
 
-  - name: run-amicus
-    container:
-      image: ahc-nlpie-docker.artifactory.umn.edu/amicus
-      imagePullPolicy: Never
-      tty: true
-      stdin: true
-      command: ["/usr/share/public_mm/scripts/run_amicus.sh"] 
-      volumeMounts:
-      - name: test-volume
-        mountPath: /data
-        readOnly: false

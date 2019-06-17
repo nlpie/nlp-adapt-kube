@@ -24,14 +24,12 @@ spec:
   - name: run-others # run steps
     steps:
 
-        #- - name: amq-deployment
-        #template: amq-server-d
+    - - name: amq-deployment
+        template: amq-server-d
 
-        #- - name: amq-service
-        #template: amq-server-s
+    - - name: amq-service
+        template: amq-server-s
 
-    - - name: biomedicus-rtf
-        template: run-rtf
     
         #- - name: biomedicus
         #template: run-biomedicus

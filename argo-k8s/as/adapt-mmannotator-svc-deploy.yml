@@ -18,42 +18,15 @@ spec:
         withSequence: # spin up arbitrary number pods
           count: 1
 
-#    - - name: mmannotator-deployment
-#        template: mmannotator-d
-#    - - name: mmannotator-service
-#        template: mmannotator-s
-#    - - name: mmserver-deployment
-#        template: mmserver-d
-#    - - name: mmserver-service
-#        template: mmserver-s
+    - - name: mmannotator-deployment
+        template: mmannotator-d
+    - - name: mmannotator-service
+        template: mmannotator-s
+    - - name: mmserver-deployment
+        template: mmserver-d
+    - - name: mmserver-service
+        template: mmserver-s
 
-  # mm server and annotator
-  - name: run-metamap
-    container:
-      image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator
-      imagePullPolicy: Never
-      tty: true
-      stdin: true
-      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
-      ports:
-      - containerPort: 8066
-      livenessProbe:
-        exec:
-          command:
-          - /bin/sh
-          - -c
-          -  nslookup medpost.default &&
-          -  ps aux | grep mmserver  
-        initialDelaySeconds: 60
-      env:
-      - name: TAGGER_SERVER_HOSTS 
-        value: medpost.default
-      - name: WSD_SERVER_HOSTS
-        value: wsd1.default
-      - name: MMSERVER_HOST 
-        value: localhost
-      - name: MMSERVER_PORT
-        value: "8066"
 
   # mmannotator deployment/service
   - name: mmannotator-d
