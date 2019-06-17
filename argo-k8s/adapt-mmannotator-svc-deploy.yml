@@ -1,16 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow                  #new type of k8s spec
 metadata:
-  generateName: nlp-adapt-wf-    #name of workflow spec
+  generateName: nlp-adapt-wf-mm-    #name of workflow spec
 spec:
   entrypoint: nlp-adapt-metamap-services          #invoke the build template
   volumes:
-      #  - name: test-data
-      #    hostPath: # change this accordingly to your host system
-      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
-      #  - name: test-conf
-      #    hostPath: # change this accordingly to your host system
-      #      path: /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
   - name: test-rtf
     hostPath: # change this accordingly to your host system
       path: /home/gms/projects/k8s/cpc
@@ -19,18 +13,47 @@ spec:
 
   - name: nlp-adapt-metamap-services
     steps:
-    #- - name: biomedicus-rtf
-    #    template: run-rtf
+    - - name: metamap-server-annotator
+        template: run-metamap
+        withSequence: # spin up arbitrary number pods
+          count: 1
 
-    - - name: mmannotator-deployment
-        template: mmannotator-d
-    - - name: mmannotator-service
-        template: mmannotator-s
-    - - name: mmserver-deployment
-        template: mmserver-d
-    - - name: mmserver-service
-        template: mmserver-s
+#    - - name: mmannotator-deployment
+#        template: mmannotator-d
+#    - - name: mmannotator-service
+#        template: mmannotator-s
+#    - - name: mmserver-deployment
+#        template: mmserver-d
+#    - - name: mmserver-service
+#        template: mmserver-s
 
+  # mm server and annotator
+  - name: run-metamap
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+      ports:
+      - containerPort: 8066
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          -  nslookup medpost.default &&
+          -  ps aux | grep mmserver  
+        initialDelaySeconds: 60
+      env:
+      - name: TAGGER_SERVER_HOSTS 
+        value: medpost.default
+      - name: WSD_SERVER_HOSTS
+        value: wsd1.default
+      - name: MMSERVER_HOST 
+        value: localhost
+      - name: MMSERVER_PORT
+        value: "8066"
 
   # mmannotator deployment/service
   - name: mmannotator-d
