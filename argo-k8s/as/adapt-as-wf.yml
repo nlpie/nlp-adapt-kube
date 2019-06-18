@@ -30,84 +30,74 @@ spec:
     - - name: amq-service
         template: amq-server-s
 
-    
-        #- - name: biomedicus
-        #template: run-biomedicus
-    
-    
-        #- - name: client
-        #template: run-client
 
-        #  - name: amq-server-d
-        #    resource:
-        #      action: create
-        #      manifest: |
-        #        apiVersion: apps/v1
-        #        kind: Deployment
-        #        metadata:
-        #          name: amq
-        #          #namespace: adapt
-        #        spec:
-        #          selector:
-        #            matchLabels:
-        #              app: amq
-        #              track: stable
-        #          template:
-        #            metadata:
-        #              labels:
-        #                app: amq
-        #                track: stable
-        #          
-        #            spec:
-        #              containers:
-        #              - image: gms/activemq
-        #                imagePullPolicy: Never
-        #                name: amq
-        #                ports:
-        #                - containerPort: 61616
-        #                - containerPort: 8161
-        #                volumeMounts:
-        #                - name: test-data
-        #                  mountPath: /opt/activemq/data
-        #                  readOnly: false  
-        #                - name: test-conf
-        #                  mountPath: /opt/activemq/conf
-        #                  readOnly: false  
-        #              volumes:
-        #              - name: test-data
-        #                hostPath:
-        #                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
-        #              - name: test-conf
-        #                hostPath:
-        #                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
-        # 
-        #
-        #  - name: amq-server-s
-        #    resource:
-        #      action: create
-        #      manifest: |
-        #        apiVersion: v1
-        #        kind: Service
-        #        metadata:
-        #          name: amq
-        #          #namespace: adapt
-        #          labels:
-        #            app: amq
-        #        spec:
-        #          selector:
-        #            app: amq
-        #          ports:
-        #          - name: test1
-        #            protocol: TCP
-        #            port: 61616
-        #            targetPort: 61616
-        #            nodePort: 31344
-        #          - name: test2
-        #            protocol: TCP
-        #            port: 8161
-        #            targetPort: 8161
-        #            nodePort: 31345
-        #          type: NodePort
+  - name: amq-server-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+       metadata:
+          name: amq
+       spec:
+          selector:
+            matchLabels:
+              app: amq
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: amq
+                track: stable
+            spec:
+              containers:
+              - image: gms/activemq
+                imagePullPolicy: Never
+                name: amq
+                ports:
+                - containerPort: 61616
+                - containerPort: 8161
+                volumeMounts:
+                - name: test-data
+                  mountPath: /opt/activemq/data
+                  readOnly: false  
+                - name: test-conf
+                  mountPath: /opt/activemq/conf
+                  readOnly: false  
+              volumes:
+              - name: test-data
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/data  
+              - name: test-conf
+                hostPath:
+                  path:  /Users/gms/development/nlp/nlpie/data/adapt/amq/conf  
+ 
+
+  - name: amq-server-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: amq
+          labels:
+            app: amq
+        spec:
+          selector:
+            app: amq
+          ports:
+          - name: test1
+            protocol: TCP
+            port: 61616
+            targetPort: 61616
+            nodePort: 31344
+          - name: test2
+            protocol: TCP
+            port: 8161
+            targetPort: 8161
+            nodePort: 31345
+          type: NodePort
 
   - name: run-rtf
     daemon: true

@@ -74,16 +74,16 @@ spec:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: wsd
+          name: wsd1
         spec:
           selector:
             matchLabels:
-              app: wsd
+              app: wsd1
               track: stable
           template:
             metadata:
               labels:
-                app: wsd
+                app: wsd1
                 track: stable
           
             spec:
@@ -94,7 +94,7 @@ spec:
                 imagePullPolicy: Never
                 command: [sh, -c]
                 args: ["wsd_foreground start"]
-                name: wsd
+                name: wsd1
                 ports:
                 - containerPort: 5554
 
@@ -105,13 +105,13 @@ spec:
         apiVersion: v1
         kind: Service
         metadata:
-          name: wsd
+          name: wsd1
           namespace: default
           labels:
-            app: wsd
+            app: wsd1
         spec:
           selector:
-            app: wsd
+            app: wsd1
           ports:
           - port: 5554
             targetPort: 5554

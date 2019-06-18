@@ -19,6 +19,7 @@ spec:
           count: 1
 
   - name: run-clamp
+    daemon: true
     container:
       image: ahc-nlpie-docker.artifactory.umn.edu/clamp
       imagePullPolicy: Never

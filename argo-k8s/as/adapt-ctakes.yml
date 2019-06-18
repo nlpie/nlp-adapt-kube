@@ -19,6 +19,7 @@ spec:
           count: 1
 
   - name: run-ctakes
+    daemon: true
     container:
       image: ahc-nlpie-docker.artifactory.umn.edu/ctakes
       imagePullPolicy: Never

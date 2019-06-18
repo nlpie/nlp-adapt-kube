@@ -21,6 +21,7 @@ spec:
   # mm server and annotator
   - name: run-metamap
     container:
+      daemon: true
       image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator
       imagePullPolicy: Never
       tty: true
@@ -36,7 +37,8 @@ spec:
           - -c
           -  nslookup medpost.default &&
           -  nslookup wsd1.default &&
-          -  ps aux | grep mmserver  
+          -  pgrep -f mmserver &&
+          -  pgrep -f org.apache.uima.adapter.jms.service.UIMA_Service  
         initialDelaySeconds: 60
       env:
       - name: TAGGER_SERVER_HOSTS 
@@ -54,6 +56,7 @@ spec:
     container:
       image: ahc-nlpie-docker.artifactory.umn.edu/cpc
       imagePullPolicy: Never
+      command: ["/bin/bash","-c", "groovy /home/groovy/scripts/metamap_client.groovy"]
       env:
         - name: NLPADAPT_BROKER_URI
           value: nio://amq.default:61616
@@ -67,7 +70,6 @@ spec:
           value: <USER NAME>
         - name: NLPADAPT_DATASOURCE_PASSWORD
           value: <PW>
-          command: ["/bin/bash","-c", "groovy /home/groovy/scripts/metamap_client.groovy"]
       volumeMounts:
       - name: test-rtf
         mountPath:  /home/groovy/data
