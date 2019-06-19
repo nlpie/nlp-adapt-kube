@@ -24,6 +24,11 @@ If you are interested in using this, please submit an issue. We can provide assi
 
 This project, including the [Wiki](https://github.com/nlpie/nlp-adapt-kube/wiki) is a work in progress...
 
+### Acknowledgements
+
+Funding for this work was provided by:
+
+* 5U01TR002062-02
 
 
 
