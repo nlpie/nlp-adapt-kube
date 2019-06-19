@@ -1,5 +1,6 @@
 import java.util.concurrent.TimeUnit
 import java.text.Normalizer
+import java.util.regex.*
 
 import groovy.io.FileType
 import groovy.sql.Sql
@@ -22,13 +23,28 @@ import edu.umn.biomedicus.uima.adapter.UimaAdapters
 def env = System.getenv();
 def group = new DefaultPGroup(8);
 def dataSource = new BasicDataSource();
-dataSource.setPoolPreparedStatements(true)
-dataSource.setMaxTotal(5)
+dataSource.setPoolPreparedStatements(true);
+dataSource.setMaxTotal(5);
 dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"]);
-dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"])
-dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"])
+dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"]);
+dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"]);
 
-def outputQueue = new DataflowQueue()
+def outputQueue = new DataflowQueue();
+
+/* compile patterns as globals */
+def patterns = [
+  [ pat:Pattern.compile(/(\d+\/\d+)-/), mat: '$1'], //done, replace with /$1/ <- i.e replaceAll(/$1/)
+  [ pat:Pattern.compile(/\.(\S\/\S)/), mat: '$1'], //done, replace with /$1/
+  [ pat:Pattern.compile(/\p{Cntrl}/), mat: ""], //done, replace with "", p{Print}?ask Ray
+  [ pat:Pattern.compile(/\P{ASCII}/), mat: ""], //matches non-ascii characters
+  [ pat:Pattern.compile(/(\\n)\./), mat: '$1'], //done, replace with /$1/
+  [ pat:Pattern.compile(/\s+\.\s+/), mat: " "], //done, replace with " "
+  [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: ""], //done, replace with " "
+  [ pat:Pattern.compile(/\|/), mat: ""], //done, replace with " "
+  [ pat:Pattern.compile(/\t/), mat: ""] //done, replace with " "
+]
+
+/*******************************/
 
 def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
@@ -61,7 +77,11 @@ final def rtfDatabaseWrite = group.reactor {
   if(it.rtf_pipeline == 'P'){
     // Do QUARANTINE here
     // NEEDS EDITED FLAG
-    def norm = Normalizer.normalize(it.rtf2plain, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
+    def norm = Normalizer.normalize(it.rtf2plain, Normalizer.Form.NFD);
+    for ( repl in patterns ) {
+      norm.replaceAll(repl.pat, repl.mat);
+    }
+    def edited = (it.rtf2plain != norm)
     def sql = Sql.newInstance(dataSource);
     sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf2plain=$norm, rtf_pipeline=$it.rtf_pipeline WHERE note_id=$it.note_id"
     sql.close();
