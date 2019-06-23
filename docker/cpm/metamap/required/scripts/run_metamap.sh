@@ -17,11 +17,18 @@ wsdserverctl start
 
 # need to ensure tagger service has beee started
 REMOTEHOST=127.0.0.1
-REMOTEPORT=1795
-TIMEOUT=5
+ANNPORT=1795
+WSDPORT=5554
+TIMEOUT=30
 
 until 
-	nc -w $TIMEOUT -z $REMOTEHOST $REMOTEPORT 
+	nc -z $REMOTEHOST $ANNPORT 
+do 
+	echo sleep && sleep 1;
+done 
+
+until 
+	nc -z $REMOTEHOST $WSDPORT 
 do 
 	echo sleep && sleep 1;
 done 
