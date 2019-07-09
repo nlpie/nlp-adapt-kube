@@ -1,4 +1,6 @@
 import java.util.concurrent.TimeUnit
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.text.Normalizer
 import java.util.regex.*
 
@@ -73,24 +75,30 @@ final def rtfArtificer = group.reactor {
     reply cas
 }
 
-final def rtfDatabaseWrite = group.reactor {
-  if(it.rtf_pipeline == 'P'){
-    // Do QUARANTINE here
-    // NEEDS EDITED FLAG
-    def norm = Normalizer.normalize(it.rtf2plain, Normalizer.Form.NFD);
-    for ( repl in patterns ) {
-      norm.replaceAll(repl.pat, repl.mat);
+final def rtfDatabaseWrite = group.reactor { data ->
+  try {
+    if(data.rtf_pipeline == 'P'){
+      def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
+      for ( repl in patterns ) {
+	norm = norm.replaceAll(repl.pat, repl.mat);
+      }
+      def sql = Sql.newInstance(dataSource);
+      if(data.rtf2plain == norm){
+	sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf2plain=$norm, rtf_pipeline=$data.rtf_pipeline, edited='N' WHERE note_id=$data.note_id"
+      } else {
+	sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET unedited=$data.rtf2plain, rtf2plain=$norm, rtf_pipeline=$data.rtf_pipeline, edited='Y' WHERE note_id=$data.note_id"
+      }
+      sql.close();
+      reply "SUCCESS: $data.note_id"
+    } else {
+      data.error = data.error?.toString().take(3999)
+      def sql = Sql.newInstance(dataSource);
+      sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf_pipeline=$data.rtf_pipeline, error=$data.error WHERE note_id=$data.note_id"
+      sql.close();
+      reply "ERROR:   $data.note_id"
     }
-    def edited = (it.rtf2plain != norm)
-    def sql = Sql.newInstance(dataSource);
-    sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf2plain=$norm, rtf_pipeline=$it.rtf_pipeline WHERE note_id=$it.note_id"
-    sql.close();
-    reply "SUCCESS: $it.note_id"
-  } else {
-    def sql = Sql.newInstance(dataSource);
-    sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf_pipeline=$it.rtf_pipeline, error=$it.error WHERE note_id=$it.note_id"
-    sql.close();
-    reply "ERROR:   $it.note_id"
+  } catch (java.sql.SQLException e){
+    reply "...WAITING FOR DATABASE..."
   }
 }
 
@@ -117,7 +125,10 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 	
 	this.output << row
       } else {
-	def row = [note_id:filename, rtf_pipeline:'E', error:aStatus.getStatusMessage().take(3999)]
+	ByteArrayOutputStream errors = new ByteArrayOutputStream();
+	PrintStream ps = new PrintStream(errors);
+	for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+	def row = [note_id:filename, rtf_pipeline:'E', error:errors]
 	this.output << row
       }
     }
