@@ -33,15 +33,15 @@ def outputQueue = new DataflowQueue();
 
 /* compile patterns as globals */
 def patterns = [
-  [ pat:Pattern.compile(/(\d+\/\d+)-/), mat: '$1'], //done, replace with /$1/ <- i.e replaceAll(/$1/)
-  [ pat:Pattern.compile(/\.(\S\/\S)/), mat: '$1'], //done, replace with /$1/
-  [ pat:Pattern.compile(/\p{Cntrl}/), mat: ""], //done, replace with "", p{Print}?ask Ray
-  [ pat:Pattern.compile(/\P{ASCII}/), mat: ""], //matches non-ascii characters
-  [ pat:Pattern.compile(/(\\n)\./), mat: '$1'], //done, replace with /$1/
-  [ pat:Pattern.compile(/\s+\.\s+/), mat: " "], //done, replace with " "
-  [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: ""], //done, replace with " "
-  [ pat:Pattern.compile(/\|/), mat: ""], //done, replace with " "
-  [ pat:Pattern.compile(/\t/), mat: ""] //done, replace with " "
+  [ pat:Pattern.compile(/(\d+\/\d+)-/), mat: '$1'],
+  [ pat:Pattern.compile(/\.(\S\/\S)/), mat: '$1'],
+  [ pat:Pattern.compile(/^\cM/), mat: ""],
+  [ pat:Pattern.compile(/\p{Cntrl}&&[^\cJ\cM\cI]/), mat: ""],
+  [ pat:Pattern.compile(/\P{ASCII}/), mat: ""],
+  [ pat:Pattern.compile(/(\\n)\./), mat: '$1'],
+  [ pat:Pattern.compile(/\s+\.\s+/), mat: " "],
+  [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: ""],
+  [ pat:Pattern.compile(/\|/), mat: " "]
 ]
 
 /*******************************/
