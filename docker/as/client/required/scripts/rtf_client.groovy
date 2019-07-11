@@ -6,6 +6,7 @@ import java.util.regex.*
 
 import groovy.io.FileType
 import groovy.sql.Sql
+import groovy.time.*
 import groovyx.gpars.group.DefaultPGroup
 import groovyx.gpars.dataflow.DataflowQueue
 
@@ -23,8 +24,9 @@ import edu.umn.biomedicus.uima.adapter.UimaAdapters
 
 
 def env = System.getenv();
-def group = new DefaultPGroup(8);
+def group = new DefaultPGroup(4);
 def dataSource = new BasicDataSource();
+def time = new Date();
 dataSource.setPoolPreparedStatements(true);
 dataSource.setMaxTotal(5);
 dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"]);
@@ -75,31 +77,42 @@ final def rtfArtificer = group.reactor {
     reply cas
 }
 
-final def rtfDatabaseWrite = group.reactor { data ->
-  try {
-    if(data.rtf_pipeline == 'P'){
-      def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
-      for ( repl in patterns ) {
-	norm = norm.replaceAll(repl.pat, repl.mat);
+def rtfDatabaseWrite = group.reactor { queue ->
+  if(queue.length()) {
+    def sql = Sql.newInstance(dataSource);
+    sql.withTransaction {
+      sql.withBatch("UPDATE nlp_sandbox.u01_tmp SET rtf2plain=:rtf2plain, rtf_pipeline=:rtf_pipeline, edited=:edited, error=:error, unedited=:unedited WHERE note_id=:note_id"){ stmt ->
+	def output = []
+	while(queue.length()) output << queue.val
+	for( data in output ){
+	  if(data.rtf_pipeline == 'P'){
+	    def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
+	    for ( repl in patterns ) {
+	      norm = norm.replaceAll(repl.pat, repl.mat);
+	    }
+	    if(data.rtf2plain == norm){
+	      data.edited = 'N'
+	    } else {
+	      data.edited = 'Y'
+	      data.unedited = data.rtf2plain
+	      data.rtf2plain = norm
+	    }
+	    stmt.addBatch(data)
+	    println "SUCCESS: $data.note_id"
+	  } else {
+	    data.error = data.error?.toString().take(3999)
+	    stmt.addBatch(data);
+	    println "ERROR:   $data.note_id"
+	  }
+	}
       }
-      def sql = Sql.newInstance(dataSource);
-      if(data.rtf2plain == norm){
-	sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf2plain=$norm, rtf_pipeline=$data.rtf_pipeline, edited='N' WHERE note_id=$data.note_id"
-      } else {
-	sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET unedited=$data.rtf2plain, rtf2plain=$norm, rtf_pipeline=$data.rtf_pipeline, edited='Y' WHERE note_id=$data.note_id"
-      }
-      sql.close();
-      reply "SUCCESS: $data.note_id"
-    } else {
-      data.error = data.error?.toString().take(3999)
-      def sql = Sql.newInstance(dataSource);
-      sql.executeUpdate "UPDATE nlp_sandbox.u01_tmp SET rtf_pipeline=$data.rtf_pipeline, error=$data.error WHERE note_id=$data.note_id"
-      sql.close();
-      reply "ERROR:   $data.note_id"
     }
-  } catch (java.sql.SQLException e){
-    reply "...WAITING FOR DATABASE..."
+    sql.close();
+    reply "${new Date()}: PROCESSED BATCH"
+  } else {
+    reply "${new Date()}:     EMPTY BATCH"
   }
+    // sleep(1000);
 }
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
@@ -121,24 +134,27 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 	
       if(!aStatus.isException()){
 	String documentText = aCas.getView("Analysis").getDocumentText()
-	def row = [note_id:filename, rtf2plain:documentText, rtf_pipeline:'P']
+	def row = [note_id:filename, rtf2plain:documentText, rtf_pipeline:'P', error:null, unedited:null, edited:'N']
 	
 	this.output << row
       } else {
 	ByteArrayOutputStream errors = new ByteArrayOutputStream();
 	PrintStream ps = new PrintStream(errors);
 	for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
-	def row = [note_id:filename, rtf_pipeline:'E', error:errors]
+	def row = [note_id:filename, rtf_pipeline:'E', error:errors, rtf2plain:null, unedited:null, edited:'N']
 	this.output << row
       }
     }
 }
 
 outputQueue.wheneverBound {
-  group.actor{
-    rtfDatabaseWrite.send outputQueue.val
-    react {
-      println "$it"
+  if(TimeCategory.minus(new Date(), time).toMilliseconds() > 1000){
+    time = new Date();
+    group.actor{
+      rtfDatabaseWrite.send outputQueue
+      react {
+	println "$it"
+      }
     }
   }
 }
@@ -148,7 +164,6 @@ while(true){
   in_db.withStatement { stmt ->
     stmt.setFetchSize(50)
   }
-
   in_db.eachRow("SELECT rh.content, u.* FROM nlp_sandbox.u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_final r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"){ row ->
     rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
   }
