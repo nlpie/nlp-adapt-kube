@@ -77,13 +77,10 @@ final def rtfArtificer = group.reactor {
     reply cas
 }
 
-def rtfDatabaseWrite = group.reactor { queue ->
-  if(queue.length()) {
+def rtfDatabaseWrite = group.reactor { output ->
     def sql = Sql.newInstance(dataSource);
     sql.withTransaction {
       sql.withBatch("UPDATE nlp_sandbox.u01_tmp SET rtf2plain=:rtf2plain, rtf_pipeline=:rtf_pipeline, edited=:edited, error=:error, unedited=:unedited WHERE note_id=:note_id"){ stmt ->
-	def output = []
-	while(queue.length()) output << queue.val
 	for( data in output ){
 	  if(data.rtf_pipeline == 'P'){
 	    def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
@@ -109,10 +106,6 @@ def rtfDatabaseWrite = group.reactor { queue ->
     }
     sql.close();
     reply "${new Date()}: PROCESSED BATCH"
-  } else {
-    reply "${new Date()}:     EMPTY BATCH"
-  }
-    // sleep(1000);
 }
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
@@ -147,15 +140,21 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
     }
 }
 
-outputQueue.wheneverBound {
-  if(TimeCategory.minus(new Date(), time).toMilliseconds() > 1000){
-    time = new Date();
-    group.actor{
-      rtfDatabaseWrite.send outputQueue
-      react {
-	println "$it"
+group.task {
+  while(true){
+    if(outputQueue.length() && TimeCategory.minus(new Date(), time).toMilliseconds() > 5000){
+      time = new Date();
+      
+      def output = [];
+      while(outputQueue.length()) output << outputQueue.val
+      group.actor{
+	rtfDatabaseWrite.send output
+	react {
+	  println "$it"
+	}
       }
     }
+    Thread.sleep 10
   }
 }
 
