@@ -12,12 +12,14 @@ import groovyx.gpars.dataflow.SyncDataflowQueue
 import org.apache.uima.cas.*
 import org.apache.uima.jcas.cas.TOP
 import org.apache.uima.util.XmlCasSerializer
+import org.apache.uima.jcas.tcas.Annotation
 import org.apache.uima.adapter.jms.client.BaseUIMAAsynchronousEngine_impl
 import org.apache.uima.aae.client.UimaAsynchronousEngine
 import org.apache.uima.aae.client.UimaAsBaseCallbackListener
 import org.apache.uima.collection.EntityProcessStatus
 import org.apache.uima.aae.client.UimaASProcessStatus
 import org.apache.uima.examples.SourceDocumentInformation
+import org.apache.uima.fit.util.CasUtil
 
 import org.apache.commons.dbcp2.BasicDataSource
 
@@ -67,15 +69,14 @@ final def biomedicusArtificer = group.reactor {
 final def biomedicusDatabaseWrite = group.reactor { data ->
   def sql = Sql.newInstance(dataSource);
   if(data.b9 == 'P'){
-    data.xmi = data.xmi?.toString()
-    // sql.withTransaction{
-    //   sql.withBatch(100, "INSERT INTO nlp_sandbox.u01_detected_item(item_type, item, note_id, engine_id, begin, end, negated, text) VALUES (:item_type, :item, :note_id, :engine_id, :begin, :end, :negated, :text)"){ ps ->
-    // 	for(i in data.items){
-    // 	  ps.addBatch(i)
-    // 	}
-    //   }
-    // }    
-    sql.executeUpdate "UPDATE u01_tmp SET b9=$data.b9, xmi=$data.xmi WHERE note_id=$data.note_id"
+    sql.withTransaction{
+      sql.withBatch(100, "INSERT INTO nlp_sandbox.u01_detected_item(item_type, item, note_id, engine_id, begin, end, negated, text) VALUES (:item_type, :item, :note_id, :engine_id, :begin, :end, :negated, :text)"){ ps ->
+    	for(i in data.items){
+    	  ps.addBatch(i)
+    	}
+      }
+    }    
+    sql.executeUpdate "UPDATE u01_tmp SET b9=$data.b9 WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
     data.error = data.error?.toString().take(3999)
@@ -92,32 +93,79 @@ class BiomedicusCallbackListener extends UimaAsBaseCallbackListener {
 	this.output = output
     }
 
-    @Override
-    void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-
-	Type type = aCas.getTypeSystem().getType("ArtifactID");
-	Feature documentId = type.getFeatureByBaseName("artifactID");
-		
-	Integer source_note_id = aCas.getView("metadata")
-	.getIndexRepository()
-	.getAllIndexedFS(type)
-	.next()
-	.getStringValue(documentId) as Integer;
-	
-	if(!aStatus.isException()){
-	  ByteArrayOutputStream xmi = new ByteArrayOutputStream();
-	  XmlCasSerializer.serialize(aCas, xmi)
-	  def process_results = [note_id:source_note_id, b9:'P', xmi:xmi]
-	  this.output << process_results
-	} else {
-	  ByteArrayOutputStream errors = new ByteArrayOutputStream();
-	  PrintStream ps = new PrintStream(errors);
-	  for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
-	  def process_results = [note_id:source_note_id, b9:'E', error:errors]
-	  this.output << process_results
-	}
-	
+  Map getNegations(CAS aCas) {
+    Type negatedType = aCas.getTypeSystem().getType("biomedicus.v2.Negated");
+    
+    def negated = CasUtil.select(aCas, negatedType);
+    def negated_items = negated.collectEntries{ n ->
+      [n.getBegin(), n.getEnd()]
     }
+    return negated_items
+  }
+  
+  @Override
+  void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
+
+    CAS analysis = aCas.getView("Analysis");
+      
+    Type type = aCas.getTypeSystem().getType("ArtifactID");
+    Feature documentId = type.getFeatureByBaseName("artifactID");
+      
+    Integer source_note_id = aCas.getView("metadata")
+    .getIndexRepository()
+    .getAllIndexedFS(type)
+    .next()
+    .getStringValue(documentId) as Integer;
+    Type termType = aCas.getTypeSystem().getType("biomedicus.v2.UmlsConcept");
+    Feature cui = termType.getFeatureByBaseName("cui");
+    
+    Type acronymType = aCas.getTypeSystem().getType("biomedicus.v2.Acronym");
+    Feature expansion = acronymType.getFeatureByBaseName("text");
+    
+    def items = [];
+    def negated = getNegations(analysis);
+    def concepts = CasUtil.select(analysis, termType);
+    items.addAll(
+      concepts.collect{ c ->
+    	[
+    	item_type:'C',
+    	item:c.getStringValue(cui),
+    	note_id:source_note_id,
+    	engine_id:1,
+    	begin:c.getBegin(),
+    	end:c.getEnd(),
+    	negated: [c.getBegin(), c.getEnd()] in negated ? 'T' : 'F',
+    	text: c.getCoveredText()
+    	]
+      });
+    def acronyms = CasUtil.select(analysis, acronymType);
+    items.addAll(
+      acronyms.collect{ a ->
+    	[
+    	item_type:'A',
+    	item:a.getStringValue(expansion),
+    	note_id:source_note_id,
+    	engine_id:1,
+    	begin:a.getBegin(),
+    	end:a.getEnd(),
+    	negated: null,
+    	text: a.getCoveredText()
+    	]
+      });
+    
+    if(!aStatus.isException()){
+      // ByteArrayOutputStream xmi = new ByteArrayOutputStream();
+      // XmlCasSerializer.serialize(aCas, xmi);
+      def process_results = [note_id:source_note_id, b9:'P', items:items]
+      this.output << process_results
+    } else {
+      ByteArrayOutputStream errors = new ByteArrayOutputStream();
+      PrintStream ps = new PrintStream(errors);
+      for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+      def process_results = [note_id:source_note_id, b9:'E', error:errors]
+      this.output << process_results
+    }  
+  }
 }
 
 outputQueue.wheneverBound {
