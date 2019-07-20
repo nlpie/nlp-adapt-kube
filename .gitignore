@@ -24,5 +24,6 @@ docker/nlp-tab/nlptab-webapp
 config
 **/biomedicus-distribution-2.2.0-SNAPSHOT-release
 **ojdbc7.jar
+**ojdbc8.jar
 **/data
 **/conf*
