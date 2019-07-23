@@ -4,6 +4,7 @@ FROM openjdk:8-jre
 RUN apt-get update
 RUN apt-get install netcat -y
 RUN apt-get install dnsutils -y
+RUN apt-get install procps -y
 
 ADD public_mm /usr/share/public_mm
 COPY required/scripts /usr/share/public_mm/bin
