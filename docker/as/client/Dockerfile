@@ -1,5 +1,6 @@
 FROM openjdk:8-jdk
 
+
 CMD ["groovysh"]
 
 ENV GROOVY_HOME /opt/groovy
@@ -60,6 +61,11 @@ RUN set -o errexit -o nounset \
     \
     && echo "Symlinking root .groovy to groovy .groovy" \
     && ln -s /home/groovy/.groovy /root/.groovy
+
+RUN apt-get update
+RUN apt-get install netcat -y
+RUN apt-get install dnsutils -y
+RUN apt-get install procps -y
 
 # Create Grapes volume
 #USER groovy
