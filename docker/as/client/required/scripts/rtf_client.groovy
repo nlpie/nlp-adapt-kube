@@ -38,12 +38,11 @@ def outputQueue = new DataflowQueue();
 /* compile patterns as globals */
 def patterns = [
   [ pat:Pattern.compile(/(\d+\/\d+)-/), mat: '$1'],
-  [ pat:Pattern.compile(/\.(\S\/\S)/), mat: '$1'],
+  [ pat:Pattern.compile(/(\s+|^|\\n)\.(\D+)/), mat: '$1$2'],
   [ pat:Pattern.compile(/^\cM/), mat: ""],
   [ pat:Pattern.compile(/\p{Cntrl}&&[^\cJ\cM\cI]/), mat: ""],
   [ pat:Pattern.compile(/\P{ASCII}/), mat: ""],
-  [ pat:Pattern.compile(/(\\n)\./), mat: '$1'],
-  [ pat:Pattern.compile(/\s+\.\s+/), mat: " "],
+  [ pat:Pattern.compile(/(\s+)\.+(\s*)/), mat: '$1$2'],
   [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: ""],
   [ pat:Pattern.compile(/\|/), mat: " "]
 ]
@@ -84,9 +83,13 @@ def rtfDatabaseWrite = group.reactor { output ->
 	for( data in output ){
 	  if(data.rtf_pipeline == 'P'){
 	    def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
+
 	    for ( repl in patterns ) {
-	      norm = norm.replaceAll(repl.pat, repl.mat);
+	      while(norm =~ repl.pat){
+		norm = norm.replaceAll(repl.pat, repl.mat);
+	      }
 	    }
+	    
 	    if(data.rtf2plain == norm){
 	      data.edited = 'N'
 	    } else {
