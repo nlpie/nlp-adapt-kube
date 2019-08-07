@@ -2,6 +2,7 @@
 #!/usr/bin/env bash
 
 # start mmserver
+
 mmserver &
 
 source /usr/share/public_mm/src/uima/bin/setup_uima.sh
