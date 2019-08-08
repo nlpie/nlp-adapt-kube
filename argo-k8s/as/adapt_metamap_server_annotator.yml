@@ -1,0 +1,125 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow                  #new type of k8s spec
+metadata:
+  generateName: nlp-adapt-wf-    #name of workflow spec
+spec:
+  entrypoint: nlp-adapt-metamap-services          #invoke the build template
+  
+  templates:
+
+  - name: nlp-adapt-metamap-services
+    steps:
+    - - name: mm-sa-deployment
+        template: mm-sa-d
+        #template: run-metamap
+       # withSequence: # spin up arbitrary number pods
+       #   count: 1
+      - name: mm-sa-service
+        template: mm-sa-s
+
+  # mm-sa deployment and service
+  - name: mm-sa-d
+    resource:
+      action: create
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: mm-sa
+        spec:
+          replicas: 3
+          selector:
+            matchLabels:
+              app: mm-sa
+              track: stable
+          template:
+            metadata:
+              labels:
+                app: mm-sa
+                track: stable
+            spec:
+              nodeSelector:
+                node: hermes
+              containers:
+              - image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator:7
+                imagePullPolicy: Never
+                #command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+                command: ["bash", "-c", "stdbuf -o0 /usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh |& tee >(grep --line-buffered 'Not a fast prolog expression-1' > /tmp/ERROR)"]
+                name: mm-sa
+                ports:
+                - containerPort: 8066
+                livenessProbe:
+                  exec:
+                    command:  ["bash", "-c", "[[ ! -s /tmp/ERROR ]]"]
+ 
+                    #-  nslookup medpost.default;
+                    #-  nslookup wsd1.default;
+                    #-  pgrep -f mmserver;
+                    #-  pgrep -f org.apache.uima.adapter.jms.service.UIMA_Service;
+                    #-  pgrep -f mmserver18.BINARY.Linux;
+                    #-  nc localhost 8066;
+                 # initialDelaySeconds: 120
+                env:
+                - name: TAGGER_SERVER_HOSTS
+                  value: medpost.default
+                - name: WSD_SERVER_HOSTS
+                  value: wsd1.default
+                - name: MMSERVER_HOST
+                  value: localhost
+                - name: MMSERVER_PORT
+                  value: "8066"
+
+  - name: run-metamap
+    nodeSelector:
+      node: bpb
+    container:
+      image: ahc-nlpie-docker.artifactory.umn.edu/mm_server_annotator
+      imagePullPolicy: Never
+      tty: true
+      stdin: true
+      name: mm-sa
+      command: ["/usr/share/public_mm/src/uima/bin/deployMetamapPipeline.sh"] 
+      ports:
+      - containerPort: 8066
+      livenessProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          -  nslookup medpost.default;
+          -  nslookup wsd1.default;
+          -  pgrep -f mmserver;
+          -  pgrep -f org.apache.uima.adapter.jms.service.UIMA_Service;
+          -  pgrep -f mmserver18.BINARY.Linux
+        initialDelaySeconds: 60
+      env:
+      - name: TAGGER_SERVER_HOSTS 
+        value: medpost.default
+      - name: WSD_SERVER_HOSTS
+        value: wsd1.default
+      - name: MMSERVER_HOST 
+        value: localhost
+      - name: MMSERVER_PORT
+        value: "8066"
+
+  - name: mm-sa-s
+    resource:
+      action: create
+      manifest: |
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mm-sa
+          namespace: default
+          labels:
+            app: mm-sa
+        spec:
+          selector:
+            app: mm-sa
+          ports:
+          - port: 8066
+            targetPort: 8066
+
+
+
+       

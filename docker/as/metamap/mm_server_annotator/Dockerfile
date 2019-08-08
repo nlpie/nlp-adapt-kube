@@ -15,9 +15,7 @@ ENV PATH=/usr/share/public_mm/bin:$PATH
 
 WORKDIR  /usr/share/public_mm
 
-USER root
 # --- BUILD ---
-#RUN chmod 755 /usr/share/public_mm/bin/docker-install.sh
 RUN mkdir -p /usr/share/public_mm/WSD_Server/log
 RUN mkdir -p /usr/share/public_mm/MedPost-SKR/Tagger_server/log
 RUN chmod -R 755 /usr/share/public_mm/src/uima/bin
