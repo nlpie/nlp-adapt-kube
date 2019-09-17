@@ -5,7 +5,6 @@ import groovy.io.FileType
 def currentDir = new File(this.args[0]); 
 
 patterns = [
-  [ pat:~/(\d+\/\d+)(-)/, mat: {global, x, y -> "$x" + " ".multiply(y.size())}],
   [ pat:~/(\s+|^|\\n)(\.)(\D+)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
   [ pat:~/^\cM/, mat: ""],
   [ pat:~/\p{Cntrl}&&[^\cJ\cM\cI]/, mat: ""],
