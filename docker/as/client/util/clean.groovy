@@ -5,14 +5,14 @@ import groovy.io.FileType
 def currentDir = new File(this.args[0]); 
 
 patterns = [
-  [ pat:Pattern.compile(/(\d+\/\d+)(-)/), mat: {global, x, y -> "$x" + " ".multiply(y.size())}],
-  [ pat:Pattern.compile(/(\s+|^|\\n)(\.)(\D+)/), mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
-  [ pat:Pattern.compile(/^\cM/), mat: ""],
-  [ pat:Pattern.compile(/\p{Cntrl}&&[^\cJ\cM\cI]/), mat: ""],
-  [ pat:Pattern.compile(/\P{ASCII}/), mat: {x -> " ".multiply(x.size())}],
-  [ pat:Pattern.compile(/(\s+)(\.+)(\s*)/), mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
+  [ pat:~/(\d+\/\d+)(-)/, mat: {global, x, y -> "$x" + " ".multiply(y.size())}],
+  [ pat:~/(\s+|^|\\n)(\.)(\D+)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
+  [ pat:~/^\cM/, mat: ""],
+  [ pat:~/\p{Cntrl}&&[^\cJ\cM\cI]/, mat: ""],
+  [ pat:~/\P{ASCII}/, mat: {x -> " ".multiply(x.size())}],
+  [ pat:~/(\s+)(\.+)((?!\d)\s*)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
   [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: {global -> " ".multiply(global.size())}],
-  [ pat:Pattern.compile(/\|/), mat: {global -> " ".multiply(global.size())}]
+  [ pat:~/\|/, mat: {global -> " ".multiply(global.size())}]
 ];
 
 def filerep(file){
