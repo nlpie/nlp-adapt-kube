@@ -25,27 +25,40 @@ import edu.umn.biomedicus.uima.adapter.UimaAdapters
 
 def env = System.getenv();
 def group = new DefaultPGroup(4);
-def dataSource = new BasicDataSource();
 def time = new Date();
+
+def batchBegin = env["BATCH_BEGIN"] ?: 0;
+def batchEnd = env["BATCH_END"] ?: 9999;
+
+def rtfDataSource = new BasicDataSource();
+rtfDataSource.setPoolPreparedStatements(true);
+rtfDataSource.setMaxTotal(5);
+rtfDataSource.setUrl(env["RTF_DATASOURCE_URI"]);
+rtfDataSource.setUsername(env["RTF_DATASOURCE_USERNAME"]);
+rtfDataSource.setPassword(env["RTF_DATASOURCE_PASSWORD"]);
+def rtfStatement = new File("rtf_sql/rtf_text.sql").text;
+
+def dataSource = new BasicDataSource();
 dataSource.setPoolPreparedStatements(true);
 dataSource.setMaxTotal(5);
-dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"]);
-dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"]);
-dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"]);
+dataSource.setUrl(env["DATASOURCE_URI"]);
+dataSource.setUsername(env["DATASOURCE_USERNAME"]);
+dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
+def inputStatement = new File("rtf_sql/input.sql").text;
+def outputStatement = new File("rtf_sql/output.sql").text;
 
 def outputQueue = new DataflowQueue();
 
 /* compile patterns as globals */
 def patterns = [
-  [ pat:Pattern.compile(/(\d+\/\d+)-/), mat: '$1'],
-  [ pat:Pattern.compile(/(\s+|^|\\n)\.(\D+)/), mat: '$1$2'],
-  [ pat:Pattern.compile(/^\cM/), mat: ""],
-  [ pat:Pattern.compile(/\p{Cntrl}&&[^\cJ\cM\cI]/), mat: ""],
-  [ pat:Pattern.compile(/\P{ASCII}/), mat: ""],
-  [ pat:Pattern.compile(/(\s+)\.+(\s*)/), mat: '$1$2'],
-  [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: ""],
-  [ pat:Pattern.compile(/\|/), mat: " "]
-]
+  [ pat:~/(\s+|^|\\n)(\.)(\D+)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
+  [ pat:~/^\cM/, mat: ""],
+  [ pat:~/\p{Cntrl}&&[^\cJ\cM\cI]/, mat: ""],
+  [ pat:~/\P{ASCII}/, mat: {x -> " ".multiply(x.size())}],
+  [ pat:~/(\s+)(\.+)((?!\d)\s*)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
+  [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: {global -> " ".multiply(global.size())}],
+  [ pat:~/\|/, mat: {global -> " ".multiply(global.size())}]
+];
 
 /*******************************/
 
@@ -60,7 +73,7 @@ def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
 }
   
 final def rtfPipeline = getUimaPipelineClient(
-    env["NLPADAPT_BROKER_URI"],
+    env["BROKER_URI"],
     "nlpadapt.rtf.outbound",
     new RtfCallbackListener(outputQueue),
     8
@@ -79,7 +92,7 @@ final def rtfArtificer = group.reactor {
 def rtfDatabaseWrite = group.reactor { output ->
     def sql = Sql.newInstance(dataSource);
     sql.withTransaction {
-      sql.withBatch("UPDATE nlp_sandbox.u01_tmp SET rtf2plain=:rtf2plain, rtf_pipeline=:rtf_pipeline, edited=:edited, error=:error, unedited=:unedited WHERE note_id=:note_id"){ stmt ->
+      sql.withBatch(outputStatement){ stmt ->
 	for( data in output ){
 	  if(data.rtf_pipeline == 'P'){
 	    def norm = Normalizer.normalize(data.rtf2plain, Normalizer.Form.NFD);
@@ -145,7 +158,7 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 
 group.task {
   while(true){
-    if(outputQueue.length() && TimeCategory.minus(new Date(), time).toMilliseconds() > 5000){
+    if(outputQueue.length() && TimeCategory.minus(new Date(), time).toMilliseconds() > 1000){
       time = new Date();
       
       def output = [];
@@ -162,15 +175,22 @@ group.task {
 }
 
 while(true){
-  def in_db = Sql.newInstance(dataSource);
-  in_db.withStatement { stmt ->
-    stmt.setFetchSize(50)
-  }
-  in_db.eachRow("SELECT rh.content, u.* FROM nlp_sandbox.u01_tmp u INNER JOIN LZ_FV_HL7.hl7_note_hist_reduced_final r on r.note_id=u.note_id INNER JOIN NOTES.rtf_historical rh ON rh.hl7_note_historical_id=r.hl7_note_id WHERE u.rtf_pipeline IN ('U', 'R') AND rownum<=1000"){ row ->
-    rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
-  }
+  def templater = new groovy.text.SimpleTemplateEngine();
+  def inputTemplate = templater.createTemplate(inputStatement);
+  def rtfTemplate = templater.createTemplate(rtfStatement);
   
-  in_db.close();
+  for(batch in batchBegin..batchEnd){
+    def rtf_db = Sql.newInstance(rtfDataSource);
+    def db = Sql.newInstance(dataSource);
+
+    def note_ids = db.rows(inputTemplate.make(["batch":batch]).toString())*.note_id*.toString();
+    rtf_db.eachRow(rtfTemplate.make(["note_ids": note_ids]).toString()){ row ->
+      rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
+    }
+    
+    db.close();
+    rtf_db.close();
+  }
 }
 
 // multiplier.terminate()
