@@ -34,7 +34,7 @@ def scriptDir = new File(sourceUri).parent;
 
 def batchBegin = env["BATCH_BEGIN"] ?: 0;
 def batchEnd = env["BATCH_END"] ?: 9999;
-def batchOffset = env["BATCH_OFFSET"] ?: new Random().nextInt() % (batchEnd - batchBegin) + batchBegin
+def batchOffset = env["BATCH_OFFSET"] ?: (new Random().nextInt() % (batchEnd - batchBegin)) + batchBegin
 
 def rtfDataSource = new BasicDataSource();
 rtfDataSource.setPoolPreparedStatements(true);
@@ -53,7 +53,7 @@ dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
 def inputStatement = new File("$scriptDir/rtf_sql/input.sql").text;
 def outputStatement = new File("$scriptDir/rtf_sql/output.sql").text;
 
-def outputQueue = new DataflowQueue();
+DataflowQueue outputQueue = new DataflowQueue();
 
 /* compile patterns as globals */
 def patterns = [
@@ -96,6 +96,7 @@ final def rtfArtificer = group.reactor {
 }
 
 def rtfDatabaseWrite = group.reactor { output ->
+  try{
     def sql = Sql.newInstance(dataSource);
     sql.withTransaction {
       sql.withBatch(outputStatement){ stmt ->
@@ -128,6 +129,11 @@ def rtfDatabaseWrite = group.reactor { output ->
     }
     sql.close();
     reply "${new Date()}: PROCESSED BATCH"
+  } catch (Exception e){
+    //e.printStackTrace()
+    for(row in output){outputQueue << row};
+    reply "${new Date()}: DB ERROR ON BATCH"
+  }
 }
 
 class RtfCallbackListener extends UimaAsBaseCallbackListener {
