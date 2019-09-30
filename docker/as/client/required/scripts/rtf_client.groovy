@@ -34,7 +34,7 @@ def scriptDir = new File(sourceUri).parent;
 
 def batchBegin = env["BATCH_BEGIN"] ?: 0;
 def batchEnd = env["BATCH_END"] ?: 9999;
-def batchOffset = env["BATCH_OFFSET"] ?: new Random().nextInt() % (batchEnd - batchBegin)
+def batchOffset = env["BATCH_OFFSET"] ?:  new Random().nextInt(batchEnd - batchBegin)
 
 def rtfDataSource = new BasicDataSource();
 rtfDataSource.setPoolPreparedStatements(true);
@@ -190,7 +190,6 @@ while(true){
   def templater = new groovy.text.SimpleTemplateEngine();
   def inputTemplate = templater.createTemplate(inputStatement);
   def rtfTemplate = templater.createTemplate(rtfStatement);
-  
   for(batch in (batchBegin + batchOffset)..batchEnd){
     def rtf_db = Sql.newInstance(rtfDataSource);
     def db = Sql.newInstance(dataSource);
