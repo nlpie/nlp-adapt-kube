@@ -6,6 +6,7 @@ import java.util.regex.*
 
 import groovy.io.FileType
 import groovy.sql.Sql
+import groovy.transform.SourceURI
 import groovy.time.*
 import groovyx.gpars.group.DefaultPGroup
 import groovyx.gpars.dataflow.DataflowQueue
@@ -27,8 +28,13 @@ def env = System.getenv();
 def group = new DefaultPGroup(4);
 def time = new Date();
 
+@SourceURI
+URI sourceUri;
+def scriptDir = new File(sourceUri).parent;
+
 def batchBegin = env["BATCH_BEGIN"] ?: 0;
 def batchEnd = env["BATCH_END"] ?: 9999;
+def batchOffset = env["BATCH_OFFSET"] ?: new Random().nextInt() % (batchEnd - batchBegin) + batchBegin
 
 def rtfDataSource = new BasicDataSource();
 rtfDataSource.setPoolPreparedStatements(true);
@@ -36,7 +42,7 @@ rtfDataSource.setMaxTotal(5);
 rtfDataSource.setUrl(env["RTF_DATASOURCE_URI"]);
 rtfDataSource.setUsername(env["RTF_DATASOURCE_USERNAME"]);
 rtfDataSource.setPassword(env["RTF_DATASOURCE_PASSWORD"]);
-def rtfStatement = new File("rtf_sql/rtf_text.sql").text;
+def rtfStatement = new File("$scriptDir/rtf_sql/rtf_text.sql").text;
 
 def dataSource = new BasicDataSource();
 dataSource.setPoolPreparedStatements(true);
@@ -44,8 +50,8 @@ dataSource.setMaxTotal(5);
 dataSource.setUrl(env["DATASOURCE_URI"]);
 dataSource.setUsername(env["DATASOURCE_USERNAME"]);
 dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
-def inputStatement = new File("rtf_sql/input.sql").text;
-def outputStatement = new File("rtf_sql/output.sql").text;
+def inputStatement = new File("$scriptDir/rtf_sql/input.sql").text;
+def outputStatement = new File("$scriptDir/rtf_sql/output.sql").text;
 
 def outputQueue = new DataflowQueue();
 
@@ -179,18 +185,21 @@ while(true){
   def inputTemplate = templater.createTemplate(inputStatement);
   def rtfTemplate = templater.createTemplate(rtfStatement);
   
-  for(batch in batchBegin..batchEnd){
+  for(batch in (batchBegin + batchOffset)..batchEnd){
     def rtf_db = Sql.newInstance(rtfDataSource);
     def db = Sql.newInstance(dataSource);
 
     def note_ids = db.rows(inputTemplate.make(["batch":batch]).toString())*.note_id*.toString();
-    rtf_db.eachRow(rtfTemplate.make(["note_ids": note_ids]).toString()){ row ->
-      rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
+    for(n in note_ids){
+      rtf_db.eachRow(rtfTemplate.make(["note_id": n]).toString()){ row ->
+	rtfPipeline.sendCAS(rtfArtificer.sendAndWait(row));
+      }
     }
     
     db.close();
     rtf_db.close();
   }
+  batchOffset = 0;
 }
 
 // multiplier.terminate()
