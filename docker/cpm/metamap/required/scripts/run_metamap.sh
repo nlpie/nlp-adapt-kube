@@ -6,8 +6,8 @@ export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export DATA_IN=$DATA_DIRECTORY/data_in
 export METAMAP_HOME=/usr/share/public_mm # /usr/share/public_mm
 
-export JAVA_TOOL_OPTIONS='-Xms2G -Xmx6G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
-export UIMA_JVM_OPTS='-Xms128M -Xmx5g' 
+export JAVA_TOOL_OPTIONS='-Xms2G -Xmx9G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
+export UIMA_JVM_OPTS='-Xms128M -Xmx9g' 
 
 # TODO: refactor out tagger and WSD as sidecard contaienrs
 # https://github.com/argoproj/argo/tree/master/examples#sidecars

@@ -79,5 +79,5 @@ ADD required/scripts /home/groovy/scripts
 #RUN chown -R groovy:groovy /home/groovy/scripts
 #RUN chown -R groovy:groovy /home/groovy/.groovy
 
-WORKDIR /home/groovy/data
+WORKDIR /home/groovy/scripts
 
