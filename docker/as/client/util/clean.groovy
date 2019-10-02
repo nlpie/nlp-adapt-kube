@@ -8,6 +8,7 @@ patterns = [
   [ pat:~/(\s+|^|\\n)(\.)(\D+)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
   [ pat:~/^\cM/, mat: ""],
   [ pat:~/\p{Cntrl}&&[^\cJ\cM\cI]/, mat: ""],
+  [ pat:~/\p{InCombiningDiacriticalMarks}/, mat: ""],
   [ pat:~/\P{ASCII}/, mat: {x -> " ".multiply(x.size())}],
   [ pat:~/(\s+)(\.+)((?!\d)\s*)/, mat: {global, x, y, z -> "$x" + " ".multiply(y.size()) + "$z" }],
   [ pat:Pattern.compile(/^\.$/, Pattern.MULTILINE), mat: {global -> " ".multiply(global.size())}],
