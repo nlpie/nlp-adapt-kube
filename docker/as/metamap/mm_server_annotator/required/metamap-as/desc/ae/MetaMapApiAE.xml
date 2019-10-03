@@ -68,7 +68,7 @@ If this parameter is not set by the user, then the analysis engine will try to u
       <nameValuePair>
         <name>metamap_options</name>
         <value>
-          <string>--prune 20 -r 800</string>
+          <string>--prune 5 -r 800</string>
         </value>
       </nameValuePair>
     </configurationParameterSettings>
