@@ -4,9 +4,9 @@ import java.io.PrintStream
 
 import groovy.io.FileType
 import groovy.sql.Sql
+import groovy.transform.SourceURI
 import groovyx.gpars.group.DefaultPGroup
 import groovyx.gpars.dataflow.DataflowQueue
-import groovyx.gpars.dataflow.SyncDataflowQueue
 
 // INFO: UIMA Version 2.10.2 UIMA-AS Version 2.10.3
 import org.apache.uima.cas.*
@@ -23,16 +23,27 @@ import org.apache.commons.dbcp2.BasicDataSource
 
 import edu.umn.biomedicus.uima.adapter.UimaAdapters
 
-def env = System.getenv()
-def group = new DefaultPGroup(8)
-def dataSource = new BasicDataSource()
-dataSource.setPoolPreparedStatements(true)
-dataSource.setMaxTotal(5)
-dataSource.setUrl(env["NLPADAPT_DATASOURCE_URI"])
-dataSource.setUsername(env["NLPADAPT_DATASOURCE_USERNAME"])
-dataSource.setPassword(env["NLPADAPT_DATASOURCE_PASSWORD"])
+def env = System.getenv();
+def group = new DefaultPGroup(8);
 
-def outputQueue = new DataflowQueue();
+@SourceURI
+URI sourceUri;
+def scriptDir = new File(sourceUri).parent;
+
+def batchBegin = env["BATCH_BEGIN"] ?: 0;
+def batchEnd = env["BATCH_END"] ?: 9999;
+def batchOffset = env["BATCH_OFFSET"] ?:  new Random().nextInt(batchEnd - batchBegin);
+
+def dataSource = new BasicDataSource();
+dataSource.setPoolPreparedStatements(true);
+dataSource.setMaxTotal(5);
+dataSource.setUrl(env["DATASOURCE_URI"]);
+dataSource.setUsername(env["DATASOURCE_USERNAME"]);
+dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
+def inputStatement = new File("$scriptDir/metamap_sql/input.sql").text;
+def artifactStatement = new File("$scriptDir/metamap_sql/artifact.sql").text;
+
+DataflowQueue outputQueue = new DataflowQueue();
 
 def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
@@ -45,16 +56,17 @@ def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
 }
 
 final def metamapPipeline = getUimaPipelineClient(
-    env["NLPADAPT_BROKER_URI"],
+    env["BROKER_URI"],
     "nlpadapt.metamap.outbound",
     new MetamapCallbackListener(outputQueue),
     16
 );
 
+
 final def metamapArtificer = group.reactor {
     def cas = metamapPipeline.getCAS()
-    def note = it.rtf2plain?.characterStream?.text
-    def source_note_id = it.note_id // oracle test environment
+    def note = it.rtf2plain
+    def source_note_id = it.note_id
     def to_process = cas.getView("_InitialView")
     to_process.setDocumentText(note)
 
@@ -72,17 +84,17 @@ final def metamapDatabaseWrite = group.reactor { data ->
   def sql = Sql.newInstance(dataSource);
   if(data.mm == 'P'){
     sql.withTransaction{
-      sql.withBatch(100, "INSERT INTO nlp_sandbox.u01_detected_item(item_type, item, note_id, engine_id, begin, end, negated, text) VALUES (:item_type, :item, :note_id, :engine_id, :begin, :end, :negated, :text)"){ ps ->
+      sql.withBatch(100, artifactStatement){ ps ->
 	for(i in data.items){
 	  ps.addBatch(i)
 	}
       }
+      sql.executeUpdate "UPDATE dbo.u01 SET mm=$data.mm WHERE note_id=$data.note_id"
     }    
-    sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm WHERE note_id=$data.note_id"
     reply "SUCCESS: $data.note_id"
   } else {
     data.error = data.error?.toString().take(3999)
-    sql.executeUpdate "UPDATE u01_tmp SET mm=$data.mm, error=$data.error WHERE note_id=$data.note_id"
+    sql.executeUpdate "UPDATE dbo.u01 SET mm=$data.mm, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
   sql.close()
@@ -140,8 +152,8 @@ class MetamapCallbackListener extends UimaAsBaseCallbackListener {
       	item:item,
 	note_id:source_note_id,
 	engine_id:2,
-      	begin:it.getBegin(),
-      	end:it.getEnd(),
+      	begin_span:it.getBegin(),
+      	end_span:it.getEnd(),
 	negated: (negated.containsKey(item) && [it.getBegin(), it.getEnd()] in negated[item]) ? 'T' : 'F',
       	text:it.getStringValue(text)
       	]
@@ -171,15 +183,22 @@ outputQueue.wheneverBound {
 
 
 while(true){
-  def in_db = Sql.newInstance(dataSource);
-  in_db.withStatement { stmt ->
-    stmt.setFetchSize(50)
-  }
+  def templater = new groovy.text.SimpleTemplateEngine();
+  def inputTemplate = templater.createTemplate(inputStatement);
   
-  in_db.eachRow("SELECT note_id, rtf2plain FROM nlp_sandbox.u01_tmp WHERE rtf2plain IS NOT NULL AND mm IN ('U', 'R') AND rownum<=1000"){ row ->
-    metamapPipeline.sendCAS(metamapArtificer.sendAndWait(row));
+  for(batch in (batchBegin + batchOffset)..batchEnd){
+    println "$batch"
+    def in_db = Sql.newInstance(dataSource);
+    in_db.withStatement { stmt ->
+      stmt.setFetchSize(20)
+    }
+    
+    in_db.eachRow(inputTemplate.make(["batch":batch]).toString()){ row ->
+      metamapPipeline.sendCAS(metamapArtificer.sendAndWait(row));
+    }
+    
+    in_db.close();
   }
-
-  in_db.close()
+  batchOffset = 0;
 }
 
