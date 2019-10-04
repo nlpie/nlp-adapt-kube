@@ -141,12 +141,17 @@ class MetamapCallbackListener extends UimaAsBaseCallbackListener {
       Type termType = aCas.getTypeSystem().getType("org.metamap.uima.ts.Candidate");
       Feature cui = termType.getFeatureByBaseName("cui");
       Feature text = termType.getFeatureByBaseName("concept");
+      Feature score = termType.getFeatureByBaseName("score");
+      Feature preferred = termType.getFeatureByBaseName("preferred");
       
       def items = CasUtil.select(aCas, termType);
       items = items.collect{it as Annotation}
       def negated = getNegations(aCas);
       def filtered_items = items.collect{
 	def item = it.getStringValue(cui);
+	def score_val = it.getIntValue(score);
+	def preferred_val = it.getStringValue(preferred);
+	String attributes = "{'score': $score_val, 'preferred': '$preferred_val'}";
       	[
 	item_type:'C',
       	item:item,
@@ -155,7 +160,8 @@ class MetamapCallbackListener extends UimaAsBaseCallbackListener {
       	begin_span:it.getBegin(),
       	end_span:it.getEnd(),
 	negated: (negated.containsKey(item) && [it.getBegin(), it.getEnd()] in negated[item]) ? 'T' : 'F',
-      	text:it.getStringValue(text)
+      	text:it.getStringValue(text),
+	attributes:attributes
       	]
       };
       
