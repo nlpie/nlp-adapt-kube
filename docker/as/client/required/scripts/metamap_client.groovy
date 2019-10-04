@@ -187,7 +187,6 @@ while(true){
   def inputTemplate = templater.createTemplate(inputStatement);
   
   for(batch in (batchBegin + batchOffset)..batchEnd){
-    println "$batch"
     def in_db = Sql.newInstance(dataSource);
     in_db.withStatement { stmt ->
       stmt.setFetchSize(20)
