@@ -3,6 +3,7 @@ package gov.nih.nlm.nls.metamap.uima;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 import gov.nih.nlm.nls.metamap.*;
 import gov.nih.nlm.nls.metamap.uima.ts.AcronymAbbrev;
@@ -39,6 +40,9 @@ public class MetaMapAnnotator extends JCasAnnotator_ImplBase implements
   public static final String WSDSERVERCTL_PATH_PARAMETER = "wsdserverctl_path";
   public static final String METAMAP_OPTIONS_PARAMETER = "metamap_options";
   public static final String METAMAP_TIMEOUT_PARAMETER = "0";
+  public static final ReentrantLock lock = new ReentrantLock();
+  public static final ReentrantLock counterLock = new ReentrantLock();
+  public static int THREADCOUNT = 0;
   
   private String mmserverPath;
   private String skrmedpostctlPath;
@@ -47,6 +51,7 @@ public class MetaMapAnnotator extends JCasAnnotator_ImplBase implements
   private String apiTimeoutInterval;
   private String hostFromEnv;
   private String portFromEnv;
+  private int threadNum;
     
   MetaMapApi api;
 
@@ -81,6 +86,11 @@ public class MetaMapAnnotator extends JCasAnnotator_ImplBase implements
     this.startDisambiguationServer();
     this.startMetaMapServer();
     this.setupMetaMapOptions();
+    counterLock.lock();
+    THREADCOUNT++;
+    this.threadNum = THREADCOUNT;
+    counterLock.unlock();
+    System.out.println("Using server-synchronized version of MetaMapAnnotator: Thread " + this.threadNum);
   }
 
   /** Completes the processing of a batch of CASes. */
@@ -108,7 +118,11 @@ public class MetaMapAnnotator extends JCasAnnotator_ImplBase implements
   /** Inputs a CAS to the AnalysisComponent. */
   public void process(JCas jcas) {
     String docText = jcas.getDocumentText();
+    lock.lock();
+    //System.out.print("Thread " + this.threadNum + " owns the mmserver connection.");
     List<Result> resultList = this.api.processCitationsFromString(docText.trim());
+    //System.out.println("...." + this.threadNum + " finished.");
+    lock.unlock();
     int resultStartIndex = 0;
     for (Result result: resultList) {
       if (result != null) {
