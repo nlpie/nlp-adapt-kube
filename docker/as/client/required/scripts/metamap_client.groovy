@@ -65,7 +65,7 @@ final def metamapPipeline = getUimaPipelineClient(
 
 final def metamapArtificer = group.reactor {
     def cas = metamapPipeline.getCAS()
-    def note = it.rtf2plain
+    def note = it.rtf2plain ?: ""
     def source_note_id = it.note_id
     def to_process = cas.getView("_InitialView")
     to_process.setDocumentText(note)
@@ -199,7 +199,7 @@ while(true){
     }
     
     in_db.eachRow(inputTemplate.make(["batch":batch]).toString()){ row ->
-      metamapPipeline.sendCAS(metamapArtificer.sendAndWait(row));
+	metamapPipeline.sendCAS(metamapArtificer.sendAndWait(row));
     }
     
     in_db.close();
