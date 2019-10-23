@@ -42,7 +42,7 @@ rtfDataSource.setMaxTotal(5);
 rtfDataSource.setUrl(env["RTF_DATASOURCE_URI"]);
 rtfDataSource.setUsername(env["RTF_DATASOURCE_USERNAME"]);
 rtfDataSource.setPassword(env["RTF_DATASOURCE_PASSWORD"]);
-def rtfStatement = new File("$scriptDir/rtf_sql/rtf_text.sql").text;
+def rtfStatement = new File("$scriptDir/rtf_sql/clarity_text.sql").text;
 
 def dataSource = new BasicDataSource();
 dataSource.setPoolPreparedStatements(true);
