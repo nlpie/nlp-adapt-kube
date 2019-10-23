@@ -156,14 +156,14 @@ class RtfCallbackListener extends UimaAsBaseCallbackListener {
 	
       if(!aStatus.isException()){
 	String documentText = aCas.getView("Analysis").getDocumentText()
-	def row = [note_id:filename, rtf2plain:documentText, rtf_pipeline:'P', error:null, unedited:null, edited:'N']
+	def row = [note_id:filename, rtf2plain:documentText, rtf_pipeline:'P', error:null, unedited:null, edited:'N', text_source:"clarity"]
 	
 	this.output << row
       } else {
 	ByteArrayOutputStream errors = new ByteArrayOutputStream();
 	PrintStream ps = new PrintStream(errors);
 	for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
-	def row = [note_id:filename, rtf_pipeline:'E', error:errors, rtf2plain:null, unedited:null, edited:'N']
+	def row = [note_id:filename, rtf_pipeline:'E', error:errors, rtf2plain:null, unedited:null, edited:'N', text_source:"clarity"]
 	this.output << row
       }
     }
