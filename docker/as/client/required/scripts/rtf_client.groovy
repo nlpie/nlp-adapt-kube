@@ -33,7 +33,7 @@ URI sourceUri;
 def scriptDir = new File(sourceUri).parent;
 
 def batchBegin = (env["BATCH_BEGIN"] ?: 0) as Integer;
-def batchEnd = (env["BATCH_END"]?: 9999) as Integer;
+def batchEnd = (env["BATCH_END"] ?: 9999) as Integer;
 def batchOffset = env["BATCH_OFFSET"] ?:  new Random().nextInt(batchEnd - batchBegin);
 
 def rtfDataSource = new BasicDataSource();
