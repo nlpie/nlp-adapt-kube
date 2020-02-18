@@ -1,0 +1,1 @@
+INSERT INTO dbo.u01_detected_item_clamp(item_type, item, note_id, engine_id, begin_span, end_span, negated, text, attributes) VALUES (:item_type, :item, :note_id, :engine_id, :begin_span, :end_span, :negated, :text, :attributes)
