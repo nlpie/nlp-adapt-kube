@@ -95,7 +95,7 @@ final def clampDatabaseWrite = group.reactor { data ->
     reply "SUCCESS: $data.note_id"
   } else {
     data.error = data.error?.toString().take(3999)
-    sql.executeUpdate "UPDATE u01_tmp SET clamp=$data.clamp, error=$data.error WHERE note_id=$data.note_id"
+    sql.executeUpdate "UPDATE dbo.u01 SET clamp=$data.clamp, error=$data.error WHERE note_id=$data.note_id"
     reply "ERROR:   $data.note_id"
   }
   sql.close()
