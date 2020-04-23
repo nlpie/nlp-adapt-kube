@@ -15,5 +15,5 @@ ADD required/resources/org/apache/ctakes/clinical/pipeline /usr/share/ctakes/res
 RUN chmod 755 /usr/share/ctakes/scripts/run_ctakes.sh
 RUN chmod 755 /usr/share/ctakes/scripts/umls.sh
 
-WORKDIR /data
+WORKDIR /usr/share/ctakes
 

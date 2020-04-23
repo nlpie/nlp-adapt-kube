@@ -12,7 +12,7 @@ input=$DATA_IN
 output=$CLAMP_OUT
 
 
-clampbin="$CLAMP_HOME/bin/clamp-nlp-1.6.0-jar-with-dependencies.jar"
+clampbin="$CLAMP_HOME/bin/clamp-nlp-1.5.1-jar-with-dependencies.jar"
 pipeline="$CLAMP_HOME/pipeline/clamp-ner-attribute.pipeline.jar"
 umlsIndex="$CLAMP_HOME/resource/umls_index/"
 

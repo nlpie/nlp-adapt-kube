@@ -27,3 +27,4 @@ config
 **ojdbc8.jar
 **/data
 **/conf*
+**/QuickUMLS
