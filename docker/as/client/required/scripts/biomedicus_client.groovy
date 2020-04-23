@@ -80,26 +80,6 @@ final def biomedicusArtificer = group.reactor {
     reply cas
 }
 
-// final def biomedicusDatabaseWrite = group.reactor { data ->
-//   def sql = Sql.newInstance(dataSource);
-//   if(data.b9 == 'P'){
-//     sql.withTransaction{
-//       sql.withBatch(100, artifactStatement){ ps ->
-//     	for(i in data.items){
-//     	  ps.addBatch(i)
-//     	}
-//       }
-//       sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9 WHERE note_id=$data.note_id"
-//     }
-//     reply "SUCCESS: $data.note_id"
-//   } else {
-//     data.error = data.error?.toString().take(3999)
-//     sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9, error=$data.error WHERE note_id=$data.note_id"
-//     reply "ERROR:   $data.note_id"
-//   }
-//   sql.close()
-// };
-
 class BiomedicusCallbackListener extends UimaAsBaseCallbackListener {
   SyncDataflowQueue output;
 
