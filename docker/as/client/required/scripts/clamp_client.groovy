@@ -9,7 +9,7 @@ import groovy.io.FileType
 import groovy.sql.Sql
 import groovy.transform.SourceURI
 import groovyx.gpars.group.DefaultPGroup
-import groovyx.gpars.dataflow.DataflowQueue
+import groovyx.gpars.dataflow.SyncDataflowQueue
 
 import org.apache.ctakes.typesystem.type.structured.DocumentID
 
@@ -47,7 +47,7 @@ dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
 def inputStatement = new File("$scriptDir/clamp_sql/input.sql").text;
 def artifactStatement = new File("$scriptDir/clamp_sql/artifact.sql").text;
 
-DataflowQueue outputQueue = new DataflowQueue();
+SyncDataflowQueue outputQueue = new SyncDataflowQueue();
 
 def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
@@ -81,31 +81,12 @@ final def clampArtificer = group.reactor {
     reply jcas.getCas()
 }
 
-final def clampDatabaseWrite = group.reactor { data ->
-  def sql = Sql.newInstance(dataSource);
-  if(data.clamp == 'P'){
-    sql.withTransaction{
-      sql.withBatch(100, artifactStatement){ ps ->
-    	for(i in data.items){
-    	  ps.addBatch(i)
-    	}
-      }
-      sql.executeUpdate "UPDATE dbo.u01 SET clamp=$data.clamp WHERE note_id=$data.note_id"
-    }
-    reply "SUCCESS: $data.note_id"
-  } else {
-    data.error = data.error?.toString().take(3999)
-    sql.executeUpdate "UPDATE dbo.u01 SET clamp=$data.clamp, error=$data.error WHERE note_id=$data.note_id"
-    reply "ERROR:   $data.note_id"
-  }
-  sql.close()
-};
 
 class ClampCallbackListener extends UimaAsBaseCallbackListener {
-  DataflowQueue output;
+  SyncDataflowQueue output;
   JsonSlurper slurper;
 
-  ClampCallbackListener(DataflowQueue output){
+  ClampCallbackListener(SyncDataflowQueue output){
     this.output = output;
     this.slurper = new JsonSlurper(type: JsonParserType.INDEX_OVERLAY);
   }
@@ -160,15 +141,30 @@ class ClampCallbackListener extends UimaAsBaseCallbackListener {
   }
 }
 
-outputQueue.wheneverBound {
-  group.actor{
-    clampDatabaseWrite.send outputQueue.val
-    react {
-      println "$it"
+5.times{
+  group.task {
+    while(true){
+      def data = outputQueue.val;
+      def sql = Sql.newInstance(dataSource);
+      if(data.clamp == 'P'){
+	sql.withTransaction{
+	  sql.withBatch(100, artifactStatement){ ps ->
+	    for(i in data.items){
+	      ps.addBatch(i)
+	    }
+	  }
+	  sql.executeUpdate "UPDATE dbo.u01 SET clamp=$data.clamp WHERE note_id=$data.note_id"
+	}
+	println "SUCCESS: $data.note_id"
+      } else {
+	data.error = data.error?.toString().take(3999)
+	sql.executeUpdate "UPDATE dbo.u01 SET clamp=$data.clamp, error=$data.error WHERE note_id=$data.note_id"
+	println "ERROR:   $data.note_id"
+      }
+      sql.close()
     }
   }
 }
-
 
 while(true){
   def templater = new groovy.text.SimpleTemplateEngine();
