@@ -2,6 +2,8 @@ FROM node:7.8
 
 ADD nlptab-webapp /usr/share/nlptab 
 
+# RUN git clone .... > /usr/share/nlptab
+
 RUN mkdir -p /data/data_in
 
 WORKDIR /usr/share/nlptab 
