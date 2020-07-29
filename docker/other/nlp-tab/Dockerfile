@@ -2,7 +2,7 @@ FROM node:7.8
 
 ADD nlptab-webapp /usr/share/nlptab 
 
-# RUN git clone .... > /usr/share/nlptab
+RUN git clone https://github.com/nlpie/nlptab-webapp.git /usr/share/nlptab
 
 RUN mkdir -p /data/data_in
 
