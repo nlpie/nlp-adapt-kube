@@ -1,30 +1,53 @@
 import java.util.concurrent.TimeUnit
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
+import groovy.json.JsonOutput
 import groovy.io.FileType
 import groovy.sql.Sql
+import groovy.transform.SourceURI
 import groovyx.gpars.group.DefaultPGroup
 import groovyx.gpars.dataflow.DataflowQueue
 import groovyx.gpars.dataflow.SyncDataflowQueue
 
-import org.apache.ctakes.typesystem.type.structured.DocumentID
-
 // INFO: UIMA Version 2.10.2 UIMA-AS Version 2.10.3
 import org.apache.uima.cas.*
 import org.apache.uima.jcas.JCas
+import org.apache.uima.jcas.cas.TOP
 import org.apache.uima.util.XmlCasSerializer
+import org.apache.uima.jcas.tcas.Annotation
 import org.apache.uima.adapter.jms.client.BaseUIMAAsynchronousEngine_impl
 import org.apache.uima.aae.client.UimaAsynchronousEngine
 import org.apache.uima.aae.client.UimaAsBaseCallbackListener
 import org.apache.uima.collection.EntityProcessStatus
+import org.apache.uima.aae.client.UimaASProcessStatus
+import org.apache.uima.examples.SourceDocumentInformation
+import org.apache.uima.fit.util.CasUtil
 
 import org.apache.commons.dbcp2.BasicDataSource
 
-def env = System.getenv()
-def group = new DefaultPGroup(4)
-def inDataSource = new BasicDataSource()
-inDataSource.setUrl(env["NLPADAPT_INPUT_DATASOURCE_URI"])
-def outDataSource = new BasicDataSource()
-outDataSource.setUrl(env["NLPADAPT_OUTPUT_DATASOURCE_URI"])
+def env = System.getenv();
+def group = new DefaultPGroup(8);
+
+@SourceURI
+URI sourceUri;
+def scriptDir = new File(sourceUri).parent;
+
+def batchBegin = (env["BATCH_BEGIN"] ?: 0) as Integer;
+def batchEnd = (env["BATCH_END"] ?: 9999) as Integer;
+def batchOffset = env["BATCH_OFFSET"] ?:  new Random().nextInt(batchEnd - batchBegin);
+
+def dataSource = new BasicDataSource();
+dataSource.setPoolPreparedStatements(true);
+dataSource.setMaxTotal(5);
+dataSource.setUrl(env["DATASOURCE_URI"]);
+dataSource.setUsername(env["DATASOURCE_USERNAME"]);
+dataSource.setPassword(env["DATASOURCE_PASSWORD"]);
+def inputStatement = new File("$scriptDir/ctakes_sql/input.sql").text;
+def artifactStatement = new File("$scriptDir/ctakes_sql/artifact.sql").text;
+
+SyncDataflowQueue outputQueue = new SyncDataflowQueue();
+
 
 def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
@@ -37,10 +60,10 @@ def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
 }
 
 final def ctakesPipeline = getUimaPipelineClient(
-    env["NLPADAPT_BROKER_URI"],
+    env["BROKER_URI"],
     "nlpadapt.ctakes.outbound",
-    new CtakesCallbackListener(outDataSource),
-    16
+    new CtakesCallbackListener(outputQueue),
+    8
 );
 
 final def ctakesArtificer = group.reactor {
@@ -48,72 +71,84 @@ final def ctakesArtificer = group.reactor {
     def jcas = cas.getJCas()
     def doc_id = new DocumentID(jcas)
     
-    def source_note_id = it.id // for toy sqlite schema
+    def source_note_id = it.note_id
     doc_id.setDocumentID(source_note_id.toString())
     doc_id.addToIndexes()
     
-    def note = it.rtf2plain
+    def note = it.rtf2plain?.characterStream?.text
     jcas.setDocumentText(note)
+    def adapt = jcas.createView("NlpAdapt")
 
-    jcas.createView("NlpAdapt")
-    reply cas
+    reply jcas.getCas()
 }
 
 class CtakesCallbackListener extends UimaAsBaseCallbackListener {
-  BasicDataSource output;
+  SyncDataflowQueue output;
 
-  CtakesCallbackListener(BasicDataSource output){
+  CtakesCallbackListener(SyncDataflowQueue output){
 	this.output = output
     }
+  
+  @Override
+  void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
+    
+    def items = [];
 
-    @Override
-    void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-
-	// Type type = aCas.getTypeSystem().getType("DocumentID");
-	// Feature documentId = type.getFeatureByBaseName("artifactID");
-	
-	// Type conceptType = aCas.getTypeSystem().getType("uima.tcas.Annotation");
-	//Feature cui = type.getFeatureByBaseName("cui");
-	
-	// Integer source_note_id = aCas.getView("metadata")
-	// .getIndexRepository()
-	// .getAllIndexedFS(type)
-	// .next()
-	// .getStringValue(documentId) as Integer;
-
-	// CASArtifact response = UimaAdapters.getArtifact(aCas.getView("Analysis"), null)
-	// def b9 = 'P';
-	// def sql = Sql.newInstance(this.output);
-	// sql.executeUpdate "UPDATE source_note SET b9=$b9 WHERE id=$source_note_id";
-	//println "callback"
-	// for(FeatureStructure concept: aCas.getView("Analysis").getIndexRepository().getAllIndexedFS(conceptType)){
-	//   for(Feature f: conceptType.getFeatures()){
-	//     println concept.getStringValue(f)
-	//   }
-	// }
-	//println aCas.getView("Analysis").getIndexRepository().getAllIndexedFS(conceptType)
-	// for(Type t: aCas.getTypeSystem().getTypeIterator()){
-	//   println t.getName()
-	// }
-	XmlCasSerializer.serialize(aCas, System.out)
-	//println aCas.getView("Analysis")
-	// for(CAS c: aCas.getViewIterator()){
-	//   for(FeatureStructure fs: c.getIndexRepository().getAllIndexedFS(c.getJCas().getCasType(TOP.type))){
-	//     println fs.getType().getName()
-	//   }
-	// }
-	println "\n***************************************************"
-    }
+    def filtered_items = items.findAll{ it != null && it.item != null && it.item != ""};
+    
+    if(!aStatus.isException()){
+      def process_results = [note_id:source_note_id, ctakes:'P', items:filtered_items]
+      this.output << process_results
+    } else {
+      ByteArrayOutputStream errors = new ByteArrayOutputStream();
+      PrintStream ps = new PrintStream(errors);
+      for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+      def process_results = [note_id:source_note_id, ctakes:'E', error:errors]
+      this.output << process_results
+    }  
+  }
 }
 
-def in_db = Sql.newInstance(inDataSource);
-in_db.withStatement { stmt ->
-  stmt.setFetchSize(25)
+5.times{
+  group.task {
+    while(true){
+      def data = outputQueue.val;
+      def sql = Sql.newInstance(dataSource);
+      if(data.b9 == 'P'){
+	sql.withTransaction{
+	  sql.withBatch(100, artifactStatement){ ps ->
+	    for(i in data.items){
+	      ps.addBatch(i)
+	    }
+	  }
+	  sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9 WHERE note_id=$data.note_id"
+	}
+	println "SUCCESS: $data.note_id"
+      } else {
+	data.error = data.error?.toString().take(3999)
+	sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9, error=$data.error WHERE note_id=$data.note_id"
+	println "ERROR:   $data.note_id"
+      }
+      sql.close()
+    }
+  }
 }
 
 while(true){
-  def query = "SELECT id, rtf2plain FROM source_note WHERE rtf2plain IS NOT NULL AND ctakes='U' limit 1000";
-  in_db.eachRow(query){ row ->
-    ctakesPipeline.sendCAS(ctakesArtificer.sendAndWait(row));
+  def templater = new groovy.text.SimpleTemplateEngine();
+  def inputTemplate = templater.createTemplate(inputStatement);
+  
+  for(batch in (batchBegin + batchOffset)..batchEnd){
+    def in_db = Sql.newInstance(dataSource);
+    in_db.withStatement { stmt ->
+      stmt.setFetchSize(20)
+    }
+    
+    in_db.eachRow(inputTemplate.make(["batch":batch]).toString()){ row ->
+	ctakesPipeline.sendCAS(ctakesArtificer.sendAndWait(row));
+    }
+    
+    in_db.close();
   }
+  batchOffset = 0;
 }
