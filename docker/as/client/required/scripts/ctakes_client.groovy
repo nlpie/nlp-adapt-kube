@@ -53,8 +53,8 @@ def getUimaPipelineClient(uri, endpoint, callback, poolsize) {
     def pipeline = new BaseUIMAAsynchronousEngine_impl()
     if(callback != null) pipeline.addStatusCallbackListener(callback)
     def context = [(UimaAsynchronousEngine.ServerUri): uri,
-		   (UimaAsynchronousEngine.ENDPOINT): endpoint,
-		   (UimaAsynchronousEngine.CasPoolSize): poolsize]
+                   (UimaAsynchronousEngine.ENDPOINT): endpoint,
+                   (UimaAsynchronousEngine.CasPoolSize): poolsize]
     pipeline.initialize(context)
     return pipeline
 }
@@ -86,7 +86,7 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
   SyncDataflowQueue output;
 
   CtakesCallbackListener(SyncDataflowQueue output){
-	this.output = output
+        this.output = output
     }
   
   @Override
@@ -114,20 +114,20 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
     while(true){
       def data = outputQueue.val;
       def sql = Sql.newInstance(dataSource);
-      if(data.b9 == 'P'){
-	sql.withTransaction{
-	  sql.withBatch(100, artifactStatement){ ps ->
-	    for(i in data.items){
-	      ps.addBatch(i)
-	    }
-	  }
-	  sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9 WHERE note_id=$data.note_id"
-	}
-	println "SUCCESS: $data.note_id"
+      if(data.ctakes == 'P'){
+        sql.withTransaction{
+          sql.withBatch(100, artifactStatement){ ps ->
+            for(i in data.items){
+              ps.addBatch(i)
+            }
+          }
+          sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes WHERE note_id=$data.note_id"
+        }
+        println "SUCCESS: $data.note_id"
       } else {
-	data.error = data.error?.toString().take(3999)
-	sql.executeUpdate "UPDATE dbo.u01 SET b9=$data.b9, error=$data.error WHERE note_id=$data.note_id"
-	println "ERROR:   $data.note_id"
+        data.error = data.error?.toString().take(3999)
+        sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes, error=$data.error WHERE note_id=$data.note_id"
+        println "ERROR:   $data.note_id"
       }
       sql.close()
     }
@@ -145,7 +145,7 @@ while(true){
     }
     
     in_db.eachRow(inputTemplate.make(["batch":batch]).toString()){ row ->
-	ctakesPipeline.sendCAS(ctakesArtificer.sendAndWait(row));
+        ctakesPipeline.sendCAS(ctakesArtificer.sendAndWait(row));
     }
     
     in_db.close();
