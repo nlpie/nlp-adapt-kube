@@ -10,6 +10,8 @@ import groovyx.gpars.group.DefaultPGroup
 import groovyx.gpars.dataflow.DataflowQueue
 import groovyx.gpars.dataflow.SyncDataflowQueue
 
+import org.apache.ctakes.typesystem.type.structured.DocumentID
+
 // INFO: UIMA Version 2.10.2 UIMA-AS Version 2.10.3
 import org.apache.uima.cas.*
 import org.apache.uima.jcas.JCas
@@ -75,7 +77,7 @@ final def ctakesArtificer = group.reactor {
     doc_id.setDocumentID(source_note_id.toString())
     doc_id.addToIndexes()
     
-    def note = it.rtf2plain?.characterStream?.text
+    def note = it.rtf2plain ?: ""
     jcas.setDocumentText(note)
     def adapt = jcas.createView("NlpAdapt")
 
@@ -91,6 +93,14 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
   
   @Override
   void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
+    Type type = aCas.getTypeSystem().getType("org.apache.ctakes.typesystem.type.structured.DocumentID");
+    Feature documentId = type.getFeatureByBaseName("documentID");
+    
+    Integer source_note_id = aCas.getView("_InitialView")
+    .getIndexRepository()
+    .getAllIndexedFS(type)
+    .next()
+    .getStringValue(documentId) as Integer;
     
     def items = [];
 
@@ -116,17 +126,17 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
       def sql = Sql.newInstance(dataSource);
       if(data.ctakes == 'P'){
         sql.withTransaction{
-          sql.withBatch(100, artifactStatement){ ps ->
-            for(i in data.items){
-              ps.addBatch(i)
-            }
-          }
-          sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes WHERE note_id=$data.note_id"
+          // sql.withBatch(100, artifactStatement){ ps ->
+          //   for(i in data.items){
+          //     ps.addBatch(i)
+          //   }
+          // }
+          // sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes WHERE note_id=$data.note_id"
         }
         println "SUCCESS: $data.note_id"
       } else {
         data.error = data.error?.toString().take(3999)
-        sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes, error=$data.error WHERE note_id=$data.note_id"
+        // sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes, error=$data.error WHERE note_id=$data.note_id"
         println "ERROR:   $data.note_id"
       }
       sql.close()
