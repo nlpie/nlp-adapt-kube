@@ -71,10 +71,57 @@
     <delegateAnalysisEngine key="AdjustNounPhraseToIncludeFollowingPPNP">
       <import location="ctakes-chunker/desc/AdjustNounPhraseToIncludeFollowingPPNP.xml"/>
     </delegateAnalysisEngine>
+    <delegateAnalysisEngine key="SimpleSegmentAnnotator">
+      <import location="SimpleSegmentAnnotator.xml"/>
+    </delegateAnalysisEngine>
     <delegateAnalysisEngine key="POSTagger">
       <import location="ctakes-pos-tagger/desc/POSTagger.xml"/>
     </delegateAnalysisEngine>
+	<!-- 
+	<delegateAnalysisEngine key="ClearPOSTagger">
+	<import location="../../../ctakes-pos-tagger/desc/ClearNLPPOSTagger.xml"/>
+	</delegateAnalysisEngine>
+	 -->    
+    <!-- <delegateAnalysisEngine key="LvgAnnotator"> -->
+    <!--   <import location="ctakes-lvg/desc/analysis_engine/LvgAnnotator.xml"/> -->
+    <!-- </delegateAnalysisEngine> -->
+    
+    <delegateAnalysisEngine key="DrugNER">
+      <import location="ctakes-drug-ner/desc/analysis_engine/DrugMentionAnnotator.xml"/>
+    </delegateAnalysisEngine>    
+<!--     
+    <delegateAnalysisEngine key="AssertionAnnotator">
+      <import location="../../../ctakes-assertion/desc/AssertionMiniPipelineAnalysisEngine.xml"/>
+    </delegateAnalysisEngine>
+ -->
+     <!-- <delegateAnalysisEngine key="GenericCleartkAnalysisEngine"> -->
+<!--       <import location="ctakes-assertion/desc/analysis_engine/GenericCleartkAnalysisEngine.xml"/> -->
+<!--      </delegateAnalysisEngine> -->
+     
+<!--      <delegateAnalysisEngine key="HistoryCleartkAnalysisEngine"> -->
+<!--       <import location="ctakes-assertion/desc/analysis_engine/HistoryCleartkAnalysisEngine.xml"/> -->
+<!--      </delegateAnalysisEngine> -->
+<!--      <delegateAnalysisEngine key="PolarityCleartkAnalysisEngine"> -->
+<!--       <import location="ctakes-assertion/desc/analysis_engine/PolarityCleartkAnalysisEngine.xml"/> -->
+<!--      </delegateAnalysisEngine> -->
+<!--      <delegateAnalysisEngine key="SubjectCleartkAnalysisEngine"> -->
+<!--       <import location="ctakes-assertion/desc/analysis_engine/SubjectCleartkAnalysisEngine.xml"/> -->
+<!--      </delegateAnalysisEngine> -->
+<!--      <delegateAnalysisEngine key="UncertaintyCleartkAnalysisEngine"> -->
+<!--       <import location="ctakes-assertion/desc/analysis_engine/UncertaintyCleartkAnalysisEngine.xml"/> -->
+<!--      </delegateAnalysisEngine> -->
+     
+    <!-- <delegateAnalysisEngine key="DependencyParser"> -->
+<!--       <import location="ctakes-dependency-parser/desc/analysis_engine/ClearNLPDependencyParserAE.xml"/> -->
+<!--     </delegateAnalysisEngine> -->
+<!-- <delegateAnalysisEngine key="SemanticRoleLabeler"> -->
+<!-- <import location="ctakes-dependency-parser/desc/analysis_engine/ClearNLPSemanticRoleLabelerAE.xml"/> -->
+<!-- </delegateAnalysisEngine> -->
 
+<!--     <delegateAnalysisEngine key="ConstituencyParser"> -->
+<!--       <import location="ctakes-constituency-parser/desc/ConstituencyParserAnnotator.xml"/> -->
+<!--     </delegateAnalysisEngine> -->
+    
   </delegateAnalysisEngineSpecifiers>
   <analysisEngineMetaData>
     <name>AggregatePlaintextFastUMLSProcessor</name>
@@ -86,6 +133,16 @@
     <version/>
     <vendor/>
     <configurationParameters searchStrategy="language_fallback">
+      <configurationParameter>
+        <name>SegmentID</name>
+        <description/>
+        <type>String</type>
+        <multiValued>false</multiValued>
+        <mandatory>false</mandatory>
+        <overrides>
+          <parameter>SimpleSegmentAnnotator/SegmentID</parameter>
+        </overrides>
+      </configurationParameter>
       <configurationParameter>
         <name>ChunkCreatorClass</name>
         <type>String</type>
@@ -106,20 +163,31 @@
     </configurationParameterSettings>
     <flowConstraints>
       <fixedFlow>
+        <node>SimpleSegmentAnnotator</node>
         <node>SentenceDetectorAnnotator</node>
         <node>TokenizerAnnotator</node>
+        <!-- <node>LvgAnnotator</node> -->
         <node>ContextDependentTokenizerAnnotator</node>
         <node>POSTagger</node>
-		<!-- <node>ClearPOSTagger</node>  -->
+		<!-- <node>ClearPOSTagger</node>  -->        
         <node>Chunker</node>
         <node>AdjustNounPhraseToIncludeFollowingNP</node>
         <node>AdjustNounPhraseToIncludeFollowingPPNP</node>
         <!--<node>LookupWindowAnnotator</node>-->
         <node>DictionaryLookupAnnotatorDB</node>
-        <!-- <node>DrugNER</node> -->
+        <node>DrugNER</node>
+        <!-- <node>DependencyParser</node> -->
+	<!-- 	<node>SemanticRoleLabeler</node>         -->
+	<!-- 	<node>ConstituencyParser</node> -->
         <!-- <node>AssertionAnnotator</node> -->
         <node>StatusAnnotator</node>
        	<node>NegationAnnotator</node>
+       	<!-- <node>GenericCleartkAnalysisEngine</node> -->
+	<!-- 	<node>HistoryCleartkAnalysisEngine</node> -->
+	<!-- 	<node>PolarityCleartkAnalysisEngine</node> -->
+	<!-- 	<node>SubjectCleartkAnalysisEngine</node> -->
+	<!-- 	<node>UncertaintyCleartkAnalysisEngine</node> -->
+		    
         <node>ExtractionPrepAnnotator</node>
       </fixedFlow>
     </flowConstraints>
@@ -183,13 +251,8 @@
           <type allAnnotatorFeatures="true">uima.cas.AnnotationBase</type>
           <type allAnnotatorFeatures="true">uima.tcas.Annotation</type>
           <type allAnnotatorFeatures="true">org.apache.ctakes.typesystem.type.syntax.ADVP</type>
-          <type allAnnotatorFeatures="true">org.apache.ctakes.typesystem.type.syntax.ADJP</type>
+          <type allAnnotatorFeatures="true">org.apache.ctakes.typesystem.type.syntax.ADJP</type>        
         </outputs>
-        <!--
-        <inputSofas>
-            <sofaName>DeidView</sofaName>
-        </inputSofas>
-    -->
         <languagesSupported/>
       </capability>
     </capabilities>
@@ -200,61 +263,4 @@
     </operationalProperties>
   </analysisEngineMetaData>
   <resourceManagerConfiguration/>
-  <sofaMappings>
-      <sofaMapping>
-          <componentKey>SentenceDetectorAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>TokenizerAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>ContextDependentTokenizerAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>POSTagger</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>Chunker</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>AdjustNounPhraseToIncludeFollowingNP</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>AdjustNounPhraseToIncludeFollowingPPNP</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>DictionaryLookupAnnotatorDB</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>StatusAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>NegationAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-      <sofaMapping>
-          <componentKey>ExtractionPrepAnnotator</componentKey>
-          <componentSofaName>_InitialView</componentSofaName>
-          <aggregateSofaName>NlpAdapt</aggregateSofaName>
-      </sofaMapping>
-  </sofaMappings>
 </analysisEngineDescription>
