@@ -90,33 +90,65 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
   CtakesCallbackListener(SyncDataflowQueue output){
         this.output = output
     }
-  
-  @Override
-  void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
-    Type type = aCas.getTypeSystem().getType("org.apache.ctakes.typesystem.type.structured.DocumentID");
-    Feature documentId = type.getFeatureByBaseName("documentID");
     
-    Integer source_note_id = aCas.getView("_InitialView")
-    .getIndexRepository()
-    .getAllIndexedFS(type)
-    .next()
-    .getStringValue(documentId) as Integer;
+    @Override
+    void entityProcessComplete(CAS aCas, EntityProcessStatus aStatus) {
+        Type type = aCas.getTypeSystem().getType("org.apache.ctakes.typesystem.type.structured.DocumentID");
+        Feature documentId = type.getFeatureByBaseName("documentID");
     
-    def items = [];
+        Integer source_note_id = aCas.getView("_InitialView")
+            .getIndexRepository()
+            .getAllIndexedFS(type)
+            .next()
+            .getStringValue(documentId) as Integer;
+        Type termType = aCas.getTypeSystem().getType("org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation");
+        Feature polarity = termType.getFeatureByBaseName("polarity");
+        Feature historical = termType.getFeatureByBaseName("historyOf");
+        
+        Feature cuiArray = termType.getFeatureByBaseName("ontologyConceptArr");
+        Type umlsConceptType = aCas.getTypeSystem().getType("org.apache.ctakes.typesystem.type.refsem.UmlsConcept");
+        Feature cui = umlsConceptType.getFeatureByBaseName("cui");
+        Feature tui = umlsConceptType.getFeatureByBaseName("tui");
+        Feature preferred = umlsConceptType.getFeatureByBaseName("preferredText");
+        
+        def items = CasUtil.select(aCas, termType);
+        def filtered_items = []
+        items.each{
+            item -> 
+            def concepts = item.getFeatureValue(cuiArray);
+            def cuiTuis = concepts.collect{h -> [cui: h.getStringValue(cui), tui:h.getStringValue(tui), preferredText: h.getStringValue(preferred)]}.groupBy{it.cui}
+            cuiTuis.each{ k,v ->
+                filtered_items.push([
+                    item_type:'C',
+                    item:k,
+                    note_id:source_note_id,
+                    engine_id:4,
+                    begin_span:item.getBegin(),
+                    end_span:item.getEnd(),
+                    negated: item.getIntValue(polarity) < 0 ? 'T' : 'F',
+                    historical: item.getIntValue(historical),
+                    text:item.getCoveredText(),
+                    attributes:JsonOutput.toJson([semanticGroups: v*.tui, preferred: v*.preferredText[0]])
+                ])
+            }
+        }
+        
+        // def filtered_items = []; //items.findAll{ it != null && it.item != null && it.item != ""};
 
-    def filtered_items = items.findAll{ it != null && it.item != null && it.item != ""};
-    
-    if(!aStatus.isException()){
-      def process_results = [note_id:source_note_id, ctakes:'P', items:filtered_items]
-      this.output << process_results
-    } else {
-      ByteArrayOutputStream errors = new ByteArrayOutputStream();
-      PrintStream ps = new PrintStream(errors);
-      for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
-      def process_results = [note_id:source_note_id, ctakes:'E', error:errors]
-      this.output << process_results
-    }  
-  }
+        println filtered_items
+        if(!aStatus.isException()){
+            //XmlCasSerializer.serialize(aCas, System.out)
+            //println "---------------------------------------------"      
+            def process_results = [note_id:source_note_id, ctakes:'P', items:filtered_items]
+            this.output << process_results
+        } else {
+            ByteArrayOutputStream errors = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(errors);
+            for(e in aStatus.getExceptions()){ e.printStackTrace(ps); }
+            def process_results = [note_id:source_note_id, ctakes:'E', error:errors]
+            this.output << process_results
+        }  
+    }
 }
 
 5.times{
