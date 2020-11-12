@@ -72,7 +72,7 @@
       <import location="ctakes-chunker/desc/AdjustNounPhraseToIncludeFollowingPPNP.xml"/>
     </delegateAnalysisEngine>
     <delegateAnalysisEngine key="SimpleSegmentAnnotator">
-      <import location="SimpleSegmentAnnotator.xml"/>
+      <import location="ctakes-clinical-pipeline/desc/analysis_engine/SimpleSegmentAnnotator.xml"/>
     </delegateAnalysisEngine>
     <delegateAnalysisEngine key="POSTagger">
       <import location="ctakes-pos-tagger/desc/POSTagger.xml"/>
