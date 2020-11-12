@@ -131,14 +131,9 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
                     attributes:JsonOutput.toJson([semanticGroups: v*.tui, preferred: v*.preferredText[0]])
                 ])
             }
-        }
+        }        
         
-        // def filtered_items = []; //items.findAll{ it != null && it.item != null && it.item != ""};
-
-        println filtered_items
-        if(!aStatus.isException()){
-            //XmlCasSerializer.serialize(aCas, System.out)
-            //println "---------------------------------------------"      
+        if(!aStatus.isException()){     
             def process_results = [note_id:source_note_id, ctakes:'P', items:filtered_items]
             this.output << process_results
         } else {
@@ -158,17 +153,17 @@ class CtakesCallbackListener extends UimaAsBaseCallbackListener {
       def sql = Sql.newInstance(dataSource);
       if(data.ctakes == 'P'){
         sql.withTransaction{
-          // sql.withBatch(100, artifactStatement){ ps ->
-          //   for(i in data.items){
-          //     ps.addBatch(i)
-          //   }
-          // }
-          // sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes WHERE note_id=$data.note_id"
+          sql.withBatch(100, artifactStatement){ ps ->
+            for(i in data.items){
+              ps.addBatch(i)
+            }
+          }
+          sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes WHERE note_id=$data.note_id"
         }
         println "SUCCESS: $data.note_id"
       } else {
         data.error = data.error?.toString().take(3999)
-        // sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes, error=$data.error WHERE note_id=$data.note_id"
+        sql.executeUpdate "UPDATE dbo.u01 SET ctakes=$data.ctakes, error=$data.error WHERE note_id=$data.note_id"
         println "ERROR:   $data.note_id"
       }
       sql.close()
