@@ -7,8 +7,9 @@ HEADERS_MRSTY = [
 ]
 
 NEGATIONS = {'none', 'non', 'neither', 'nor', 'no', 'not'}
-'''
+
 ACCEPTED_SEMTYPES = {
+    'T101',     # Living Beings
     'T029',     # Body Location or Region
     'T023',     # Body Part, Organ, or Organ Component
     'T031',     # Body Substance
@@ -35,59 +36,6 @@ ACCEPTED_SEMTYPES = {
     'T041',     # Mental Process
     'T170',     # Intellectual Product
     'T191'      # Neoplastic Process
-}
-'''
-
-ACCEPTED_SEMTYPES = {
-    'T116', #'CHEM'
-    'T195', #'CHEM'
-    'T123', #'CHEM'
-    'T122', #'CHEM'
-    'T103', #'CHEM'
-    'T120', #'CHEM'
-    'T104', #'CHEM'
-    'T200', #'CHEM'
-    'T196', #'CHEM'
-    'T126', #'CHEM'
-    'T131', #'CHEM'
-    'T125', #'CHEM'
-    'T129', #'CHEM'
-    'T130', #'CHEM'
-    'T197', #'CHEM'
-    'T114', #'CHEM'
-    'T109', #'CHEM'
-    'T121', #'CHEM'
-    'T192', #'CHEM'
-    'T127', #'CHEM'
-    'T080', #'CONC'
-    'T081', #'CONC'
-    'T079', #'CONC'
-    'T203', #'DEVI'
-    'T074', #'DEVI'
-    'T075', #'DEVI'
-    'T020', #'DISO'
-    'T190', #'DISO'
-    'T049', #'DISO'
-    'T019', #'DISO'
-    'T047', #'DISO'
-    'T050', #'DISO'
-    'T033', #'DISO'
-    'T037', #'DISO'
-    'T048', #'DISO'
-    'T191', #'DISO'
-    'T046', #'DISO'
-    'T184', #'DISO'
-    'T100', #'LIVB'
-    'T098', #'LIVB'
-    'T168', #'OBJC'
-    'T034', #'PHEN'
-    'T060', #'PROC'
-    'T065', #'PROC'
-    'T058', #'PROC'
-    'T059', #'PROC'
-    'T063', #'PROC'
-    'T062', #'PROC'
-    'T061'  #'PROC'
 }
 
 UNICODE_DASHES = {

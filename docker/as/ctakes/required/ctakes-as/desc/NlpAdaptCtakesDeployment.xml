@@ -7,7 +7,7 @@
   <deployment protocol="jms" provider="activemq">
     <casPool numberOfCASes="1" initialFsHeapSize="2000000"/>
     <service>
-      <inputQueue endpoint="nlpadapt.ctakes.outbound" brokerURL="nio://localhost:61616" prefetch="1"/>
+      <inputQueue endpoint="nlpadapt.ctakes.outbound" brokerURL="nio://amq.default:61616" prefetch="1"/>
       <topDescriptor>
 <import location="NlpAdaptCtakesPipeline.xml"/>
       </topDescriptor>
