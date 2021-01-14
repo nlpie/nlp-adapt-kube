@@ -9,5 +9,5 @@ ADD required/scripts /usr/share/clamp/scripts
 RUN chmod 755 /usr/share/clamp/scripts/run_clamp.sh
 
 WORKDIR /usr/share/clamp
-ADD ClampUimaAs_1.5.1 /usr/share/clamp
+ADD ClampUimaAs_1.6.4 /usr/share/clamp
 
