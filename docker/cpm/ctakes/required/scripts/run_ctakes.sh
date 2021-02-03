@@ -13,6 +13,8 @@ export ctakes_umlspw=$ctakes_umlspw
 
 mkdir -p $CTAKES_OUT
 
+export JAVA_TOOL_OPTIONS='-Xms2G -Xmx9G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
+
 $CTAKES_HOME/bin/runClinicalPipeline.sh -i $DATA_IN --xmiOut $CTAKES_OUT
 
 ##### Create Archive for NLP-TAB #####
