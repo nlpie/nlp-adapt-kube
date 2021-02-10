@@ -8,12 +8,13 @@ export SAMPLE_FILE=$DATA_DIRECTORY/nlptab_manifest.txt
 export CTAKES_OUT=$DATA_DIRECTORY/ctakes_out
 
 
-export ctakes_umlsuser=$ctakes_umlsuser
-export ctakes_umlspw=$ctakes_umlspw
+#export ctakes_umlsuser=$ctakes_umlsuser
+#export ctakes_umlspw=$ctakes_umlspw
+export umlsKey=$umlsKey
 
 mkdir -p $CTAKES_OUT
 
-export JAVA_TOOL_OPTIONS='-Xms2G -Xmx9G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
+#export JAVA_TOOL_OPTIONS='-Xms2G -Xmx9G -XX:MinHeapFreeRatio=25 -XX:+UseG1GC'
 
 $CTAKES_HOME/bin/runClinicalPipeline.sh -i $DATA_IN --xmiOut $CTAKES_OUT
 
