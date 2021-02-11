@@ -10,7 +10,7 @@ RUN apt-get -qy install vim
 ADD apache-ctakes-4.0.1-SNAPSHOT /usr/share/ctakes
 ADD required/nlpie /usr/share/ctakes/nlpie
 ADD required/scripts /usr/share/ctakes/scripts
-#ADD required/resources/org/apache/ctakes/clinical/pipeline /usr/share/ctakes/resources/org/apache/ctakes/clinical/pipeline
+ADD required/resources/org/apache/ctakes/clinical/pipeline /usr/share/ctakes/resources/org/apache/ctakes/clinical/pipeline
 
 RUN chmod 755 /usr/share/ctakes/scripts/run_ctakes.sh
 RUN chmod 755 /usr/share/ctakes/scripts/umls.sh
