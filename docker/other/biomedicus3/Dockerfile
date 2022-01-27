@@ -4,6 +4,8 @@ RUN apt-get update
 RUN apt-get -qy install zip
 RUN apt-get -qy install jq 
 RUN apt-get -qy install netcat
+RUN apt-get -qy install net-tools
+
 RUN apt-get -qy install build-essential
 
 # Install miniconda
